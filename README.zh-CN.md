@@ -134,6 +134,28 @@ CODEX_BIN=/Applications/Codex.app/Contents/Resources/codex ./install.sh
 安装完成后，请新开一个 Codex thread，让 Codex 重新加载 plugin skill 和
 hook。
 
+## 升级
+
+Git marketplace 是按快照安装的。配置了 GitHub 地址以后，已经安装到本机的
+plugin 不会随着仓库更新自动实时同步。
+
+后续升级时运行：
+
+```bash
+codex plugin marketplace upgrade codex-conductor
+codex plugin add codex-conductor@codex-conductor
+```
+
+如果不确定当前 marketplace 名字：
+
+```bash
+codex plugin marketplace list
+codex plugin marketplace upgrade
+codex plugin add codex-conductor@codex-conductor
+```
+
+升级后请新开一个 Codex thread，让 Codex 重新加载新版 skills 和 hooks。
+
 ## CLI 快速开始
 
 ```bash

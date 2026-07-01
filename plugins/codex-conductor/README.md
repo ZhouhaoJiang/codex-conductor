@@ -66,6 +66,21 @@ Or run it directly:
 ./bin/codex-conductor help
 ```
 
+## Upgrade
+
+Git marketplaces are installed from snapshots. A GitHub marketplace source does
+not live-sync an already installed plugin after this repo changes.
+
+To upgrade later:
+
+```bash
+codex plugin marketplace upgrade codex-conductor
+codex plugin add codex-conductor@codex-conductor
+```
+
+Start a new Codex thread after upgrading so Codex reloads the updated skills and
+hooks.
+
 ## CLI Quick Start
 
 ```bash

@@ -140,6 +140,29 @@ Preview the commands without changing anything:
 After installation, start a new Codex thread so Codex loads the new skill and
 hook.
 
+## Upgrade
+
+Git marketplaces are installed from snapshots. A GitHub marketplace source does
+not live-sync an already installed plugin after this repo changes.
+
+To upgrade later:
+
+```bash
+codex plugin marketplace upgrade codex-conductor
+codex plugin add codex-conductor@codex-conductor
+```
+
+If you are not sure which marketplaces are configured:
+
+```bash
+codex plugin marketplace list
+codex plugin marketplace upgrade
+codex plugin add codex-conductor@codex-conductor
+```
+
+Start a new Codex thread after upgrading so Codex reloads the updated skills and
+hooks.
+
 ## CLI Quick Start
 
 ```bash
