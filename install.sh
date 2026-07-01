@@ -152,7 +152,7 @@ Codex Conductor installed.
 
 Next steps:
   1. Start a new Codex thread so plugin skills and hooks are loaded.
-  2. Try: "Use Codex Conductor to split this task into worker threads."
+  2. Try: "Use Codex Conductor to split this task into visible workers."
   3. CLI: codex-conductor help
 
 EOF

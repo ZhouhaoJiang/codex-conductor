@@ -2,6 +2,14 @@
 
 All notable changes to Codex Conductor will be documented in this file.
 
+## 0.1.7 - 2026-07-01
+
+- Generalized Conductor dispatch from thread-only workers to visible execution
+  units, including visible subagents, worker threads, and collector units.
+- Added fan-out budget and nested dispatch rules to the Conductor skills,
+  generated dispatch prompt, and hook recommendation.
+- Added smoke-test coverage for the visible dispatch protocol.
+
 ## 0.1.6 - 2026-07-01
 
 - Fixed hook registration by declaring the `UserPromptSubmit` hook manifest in
