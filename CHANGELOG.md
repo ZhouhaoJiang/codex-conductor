@@ -2,6 +2,11 @@
 
 All notable changes to Codex Conductor will be documented in this file.
 
+## 0.1.5 - 2026-07-01
+
+- Added Codex Conductor logo assets and plugin manifest icon metadata.
+- Added logo previews to the English, Chinese, and packaged plugin READMEs.
+
 ## 0.1.4 - 2026-07-01
 
 - Documented Codex's native marketplace install flow separately from developer

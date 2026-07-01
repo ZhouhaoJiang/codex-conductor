@@ -1,5 +1,9 @@
 # Codex Conductor
 
+<p align="center">
+  <img src="assets/icon.png" alt="Codex Conductor logo" width="96">
+</p>
+
 Codex Conductor is a local Codex plugin that pairs:
 
 - a small CLI for project-scoped Codex workflows

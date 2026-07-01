@@ -1,5 +1,9 @@
 # Codex Conductor
 
+<p align="center">
+  <img src="plugins/codex-conductor/assets/icon.png" alt="Codex Conductor logo" width="96">
+</p>
+
 Codex Conductor is a small orchestration layer for Codex. It packages a CLI,
 a Codex skill, and a prompt hook as a local Codex plugin so one Codex thread
 can coordinate project-scoped worker threads.
@@ -180,6 +184,10 @@ Shortcut prompts also trigger the hook when they start with `CCC`, `/ccc`,
 .agents/plugins/marketplace.json
 plugins/codex-conductor/
   .codex-plugin/plugin.json
+  assets/icon.png
+  assets/logo.png
+  assets/logo-dark.png
+  assets/logo.svg
   bin/codex-conductor
   hooks.json
   scripts/conductor-hook.mjs

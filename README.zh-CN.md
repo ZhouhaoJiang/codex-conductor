@@ -1,5 +1,9 @@
 # Codex Conductor
 
+<p align="center">
+  <img src="plugins/codex-conductor/assets/icon.png" alt="Codex Conductor logo" width="96">
+</p>
+
 Codex Conductor 是一个面向 Codex 的轻量调度层。它把 CLI、Codex skill
 和 prompt hook 打包成一个本地 Codex plugin，让任意一个 Codex 线程都能作为
 主控线程，去协调项目级 worker threads。
@@ -173,6 +177,10 @@ prompt hook 只负责注入提醒，不会自己创建线程。
 .agents/plugins/marketplace.json
 plugins/codex-conductor/
   .codex-plugin/plugin.json
+  assets/icon.png
+  assets/logo.png
+  assets/logo-dark.png
+  assets/logo.svg
   bin/codex-conductor
   hooks.json
   scripts/conductor-hook.mjs
