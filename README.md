@@ -10,6 +10,17 @@ can coordinate project-scoped worker threads.
 
 [中文说明](./README.zh-CN.md)
 
+## Ask Codex To Install It
+
+Paste this prompt into Codex:
+
+```text
+Install Codex Conductor from https://github.com/ZhouhaoJiang/codex-conductor. Add it as a Codex plugin marketplace, install codex-conductor@codex-conductor, and link the optional CLI.
+```
+
+Codex can run the native plugin install flow for you. Approve the shell
+commands and plugin trust prompt when Codex asks.
+
 ## Status
 
 Codex Conductor is experimental and currently published as a `0.1.x` local
@@ -55,18 +66,17 @@ but the coordinator remains responsible for the final synthesis.
 
 ### Native Codex Install
 
-After this repository is published, install the marketplace with Codex's native
-plugin commands:
+Install the marketplace with Codex's native plugin commands:
 
 ```bash
-codex plugin marketplace add <owner>/codex-conductor
+codex plugin marketplace add ZhouhaoJiang/codex-conductor
 codex plugin add codex-conductor@codex-conductor
 ```
 
 For a local clone, use the clone path as the marketplace root:
 
 ```bash
-git clone <repo-url> codex-conductor
+git clone https://github.com/ZhouhaoJiang/codex-conductor.git
 cd codex-conductor
 codex plugin marketplace add "$PWD"
 codex plugin add codex-conductor@codex-conductor

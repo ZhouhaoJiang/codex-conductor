@@ -18,6 +18,17 @@ worker threads through Codex App's native thread tools.
 This is an experimental `0.1.x` plugin. The CLI and install flow are usable,
 but Codex plugin manifest and hook APIs may still change.
 
+## Ask Codex To Install It
+
+Paste this prompt into Codex:
+
+```text
+Install Codex Conductor from https://github.com/ZhouhaoJiang/codex-conductor. Add it as a Codex plugin marketplace, install codex-conductor@codex-conductor, and link the optional CLI.
+```
+
+Codex can run the native plugin install flow for you. Approve the shell
+commands and plugin trust prompt when Codex asks.
+
 ## Visible Dispatch Model
 
 The current Codex thread stays responsible for coordination. Before creating or
@@ -31,10 +42,10 @@ still owns the final answer.
 
 ## Install
 
-Install the plugin through a configured Codex marketplace:
+Install the plugin through the Git marketplace:
 
 ```bash
-codex plugin marketplace add <marketplace-source>
+codex plugin marketplace add ZhouhaoJiang/codex-conductor
 codex plugin add codex-conductor@codex-conductor
 ```
 
