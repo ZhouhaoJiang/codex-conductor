@@ -9,6 +9,51 @@ trap 'rm -rf "$STATE_HOME" "$PROJECT_DIR"' EXIT
 
 export CODEX_CONDUCTOR_HOME="$STATE_HOME"
 
+PLUGIN_DIR="$PLUGIN_DIR" node <<'NODE'
+const { existsSync, readFileSync } = require("node:fs");
+const { join } = require("node:path");
+
+const pluginDir = process.env.PLUGIN_DIR;
+const manifestPath = join(pluginDir, ".codex-plugin", "plugin.json");
+const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+const hookPaths = Array.isArray(manifest.hooks)
+  ? manifest.hooks
+  : typeof manifest.hooks === "string"
+    ? [manifest.hooks]
+    : [];
+
+if (hookPaths.length === 0) {
+  throw new Error("plugin manifest must declare hook manifest paths in .codex-plugin/plugin.json");
+}
+
+for (const hookPath of hookPaths) {
+  const relativeHookPath = hookPath.replace(/^\.\//, "");
+  const absoluteHookPath = join(pluginDir, relativeHookPath);
+  if (!existsSync(absoluteHookPath)) {
+    throw new Error(`declared hook manifest is missing: ${hookPath}`);
+  }
+
+  const hookManifest = JSON.parse(readFileSync(absoluteHookPath, "utf8"));
+  const userPromptHooks = hookManifest.hooks?.UserPromptSubmit;
+  if (!Array.isArray(userPromptHooks) || userPromptHooks.length === 0) {
+    throw new Error(`${hookPath} must register a UserPromptSubmit hook`);
+  }
+
+  for (const entry of userPromptHooks) {
+    for (const hook of entry.hooks ?? []) {
+      if (hook.type !== "command" || typeof hook.command !== "string") continue;
+      const matches = hook.command.matchAll(/\$\{PLUGIN_ROOT\}\/([^"\s]+)/g);
+      for (const match of matches) {
+        const target = join(pluginDir, match[1]);
+        if (!existsSync(target)) {
+          throw new Error(`${hookPath} references missing command target: ${match[1]}`);
+        }
+      }
+    }
+  }
+}
+NODE
+
 "$CLI" help >/dev/null
 "$CLI" project add sample "$PROJECT_DIR" >/dev/null
 

@@ -2,6 +2,15 @@
 
 All notable changes to Codex Conductor will be documented in this file.
 
+## 0.1.6 - 2026-07-01
+
+- Fixed hook registration by declaring the `UserPromptSubmit` hook manifest in
+  `.codex-plugin/plugin.json` and moving it under `hooks/`.
+- Added smoke-test coverage that fails when a plugin package does not declare
+  installable hook manifests.
+- Documented the Codex prompt-based install path near the top of the English,
+  Chinese, and packaged plugin READMEs.
+
 ## 0.1.5 - 2026-07-01
 
 - Added Codex Conductor logo assets and plugin manifest icon metadata.

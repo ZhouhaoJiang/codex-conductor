@@ -193,7 +193,7 @@ plugins/codex-conductor/
   assets/logo-dark.png
   assets/logo.svg
   bin/codex-conductor
-  hooks.json
+  hooks/user-prompt-submit-recommending-conductor.json
   scripts/conductor-hook.mjs
   scripts/smoke-test
   skills/conductor/SKILL.md
@@ -212,10 +212,10 @@ plugins/codex-conductor/
 plugins/codex-conductor/scripts/smoke-test
 node --check plugins/codex-conductor/scripts/conductor-hook.mjs
 python3 -m json.tool plugins/codex-conductor/.codex-plugin/plugin.json >/dev/null
-python3 -m json.tool plugins/codex-conductor/hooks.json >/dev/null
+python3 -m json.tool plugins/codex-conductor/hooks/user-prompt-submit-recommending-conductor.json >/dev/null
 bash -n install.sh plugins/codex-conductor/bin/codex-conductor plugins/codex-conductor/scripts/smoke-test
 ./install.sh --dry-run
-python3 /path/to/plugin-creator/scripts/validate_plugin.py plugins/codex-conductor
+codex plugin add codex-conductor@codex-conductor --json
 ```
 
 ## 贡献和安全
