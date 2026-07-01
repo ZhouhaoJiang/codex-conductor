@@ -1,0 +1,90 @@
+# Codex Conductor
+
+Codex Conductor is a local Codex plugin that pairs:
+
+- a small CLI for project-scoped Codex workflows
+- focused Codex skills for App-side thread orchestration
+- a prompt hook that suggests Conductor when a prompt looks like
+  multi-thread, worker, project, or session orchestration work
+
+The CLI keeps human terminal workflows fast. The skill lets any Codex App
+session act as a coordinator that can create, fork, message, read, and summarize
+worker threads through Codex App's native thread tools.
+
+This is an experimental `0.1.x` plugin. The CLI and install flow are usable,
+but Codex plugin manifest and hook APIs may still change.
+
+## Install The CLI
+
+From this plugin directory:
+
+```bash
+chmod +x bin/codex-conductor
+ln -sf "$PWD/bin/codex-conductor" /usr/local/bin/codex-conductor
+```
+
+Or run it directly:
+
+```bash
+./bin/codex-conductor help
+```
+
+## CLI Quick Start
+
+```bash
+codex-conductor project add app ~/projects/my-app
+codex-conductor project use app
+codex-conductor project list
+codex-conductor open "inspect the current task context"
+codex-conductor dispatch "split this into db, backend, and ui worker threads"
+```
+
+Set `CODEX_CONDUCTOR_HOME` to keep state somewhere other than
+`~/.codex-conductor`.
+
+## Codex App Usage
+
+After installing the plugin, start a new Codex thread and say:
+
+```text
+Use Codex Conductor to split this task into worker threads.
+```
+
+The companion skill tells Codex how to use the built-in App thread tools rather
+than requiring a separate MCP server.
+
+## Skills And Hook
+
+Installed skills:
+
+- `conductor`
+- `conductor-dispatch`
+- `conductor-projects`
+- `conductor-collector`
+
+Installed hook:
+
+- `UserPromptSubmit`: checks whether the prompt looks like Codex thread
+  orchestration work and injects a short recommendation when useful.
+
+## Prompt Hook Behavior
+
+The plugin includes a `UserPromptSubmit` hook. It does not create threads by
+itself. It only injects a short recommendation when the user's prompt strongly
+looks like orchestration work, so the agent can ask whether to use Conductor or
+proceed when the user explicitly requested dispatch.
+
+Examples that should trigger it:
+
+- "CCC 帮我拆成 worker 跑"
+- "codex con collect workers"
+- "把这个任务拆成多个 worker 并行跑"
+- "跨 session 调度一下这个项目"
+- "fork 几个线程分别查 DB/backend/frontend"
+
+Examples that should not trigger it:
+
+- "解释一下这个函数"
+- "codex context7 帮我查 docs"
+- "修这个单文件 bug"
+- "不要用 conductor"

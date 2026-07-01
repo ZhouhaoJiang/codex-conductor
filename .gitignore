@@ -1,0 +1,6 @@
+.DS_Store
+.codegraph
+*.log
+node_modules/
+.codex-conductor/
+tmp/

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CLI="$PLUGIN_DIR/bin/codex-conductor"
+STATE_HOME="$(mktemp -d)"
+PROJECT_DIR="$(mktemp -d)"
+trap 'rm -rf "$STATE_HOME" "$PROJECT_DIR"' EXIT
+
+export CODEX_CONDUCTOR_HOME="$STATE_HOME"
+
+"$CLI" help >/dev/null
+"$CLI" project add sample "$PROJECT_DIR" >/dev/null
+
+current="$("$CLI" project current)"
+[[ "$current" == "sample" ]] || {
+  printf 'expected current project sample, got %s\n' "$current" >&2
+  exit 1
+}
+
+path="$("$CLI" project path)"
+[[ "$path" == "$PROJECT_DIR" ]] || {
+  printf 'expected project path %s, got %s\n' "$PROJECT_DIR" "$path" >&2
+  exit 1
+}
+
+dispatch="$("$CLI" dispatch sample split this task)"
+[[ "$dispatch" == *"Use the Codex Conductor skill."* ]] || {
+  printf 'dispatch prompt did not mention the skill\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"split this task"* ]] || {
+  printf 'dispatch prompt did not include the goal\n' >&2
+  exit 1
+}
+
+hook_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"把这个任务拆成多个 worker 并行跑"}'
+hook_output="$(printf '%s' "$hook_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$hook_output" == *"codex-conductor-recommendation"* ]] || {
+  printf 'hook did not recommend conductor for orchestration prompt\n' >&2
+  exit 1
+}
+
+shortcut_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 帮我拆成 worker 跑"}'
+shortcut_output="$(printf '%s' "$shortcut_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$shortcut_output" == *"codex-conductor-recommendation"* ]] || {
+  printf 'hook did not recommend conductor for CCC shortcut\n' >&2
+  exit 1
+}
+
+codex_con_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"codex con collect workers"}'
+codex_con_output="$(printf '%s' "$codex_con_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$codex_con_output" == *"codex-conductor-recommendation"* ]] || {
+  printf 'hook did not recommend conductor for codex con shortcut\n' >&2
+  exit 1
+}
+
+plain_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"解释一下这个函数"}'
+plain_output="$(printf '%s' "$plain_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ -z "$plain_output" ]] || {
+  printf 'hook recommended conductor for plain prompt\n' >&2
+  exit 1
+}
+
+context_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"codex context7 帮我查 docs"}'
+context_output="$(printf '%s' "$context_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ -z "$context_output" ]] || {
+  printf 'hook recommended conductor for codex context prompt\n' >&2
+  exit 1
+}
+
+printf 'codex-conductor smoke test passed\n'

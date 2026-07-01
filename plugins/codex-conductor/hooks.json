@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/scripts/conductor-hook.mjs\" user-prompt-submit",
+            "timeout": 3,
+            "statusMessage": "(Conductor) Checking orchestration fit"
+          }
+        ]
+      }
+    ]
+  }
+}

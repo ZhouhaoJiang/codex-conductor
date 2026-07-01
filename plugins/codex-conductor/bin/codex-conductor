@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_HOME="${CODEX_CONDUCTOR_HOME:-$HOME/.codex-conductor}"
+PROJECTS_FILE="$STATE_HOME/projects.tsv"
+CURRENT_FILE="$STATE_HOME/current-project"
+
+usage() {
+  cat <<'USAGE'
+codex-conductor
+
+Usage:
+  codex-conductor help
+  codex-conductor project add <name> <path> [profile]
+  codex-conductor project use <name>
+  codex-conductor project current
+  codex-conductor project list
+  codex-conductor project path [name]
+  codex-conductor open [name] [prompt...]
+  codex-conductor exec [name] <prompt...>
+  codex-conductor resume <thread-id-or-name> [prompt...]
+  codex-conductor fork <thread-id-or-name> [prompt...]
+  codex-conductor dispatch [name] <goal...>
+
+Environment:
+  CODEX_CONDUCTOR_HOME  State directory. Defaults to ~/.codex-conductor.
+USAGE
+}
+
+ensure_state() {
+  mkdir -p "$STATE_HOME"
+  touch "$PROJECTS_FILE"
+}
+
+die() {
+  printf 'codex-conductor: %s\n' "$*" >&2
+  exit 1
+}
+
+require_codex() {
+  command -v codex >/dev/null 2>&1 || die "codex CLI was not found in PATH"
+}
+
+project_row() {
+  local name="$1"
+  awk -F '\t' -v name="$name" '$1 == name { print; found = 1; exit } END { exit found ? 0 : 1 }' "$PROJECTS_FILE"
+}
+
+current_project_name() {
+  [[ -s "$CURRENT_FILE" ]] || die "no current project; run: codex-conductor project use <name>"
+  cat "$CURRENT_FILE"
+}
+
+resolve_project_name() {
+  local maybe_name="${1:-}"
+  if [[ -n "$maybe_name" ]] && project_row "$maybe_name" >/dev/null 2>&1; then
+    printf '%s\n' "$maybe_name"
+    return
+  fi
+  current_project_name
+}
+
+project_path() {
+  local name="$1"
+  local row
+  row="$(project_row "$name")" || die "unknown project: $name"
+  printf '%s\n' "$row" | awk -F '\t' '{ print $2 }'
+}
+
+project_profile() {
+  local name="$1"
+  local row
+  row="$(project_row "$name")" || die "unknown project: $name"
+  printf '%s\n' "$row" | awk -F '\t' '{ print $3 }'
+}
+
+codex_project_args() {
+  local name="$1"
+  local path profile
+  path="$(project_path "$name")"
+  profile="$(project_profile "$name")"
+  printf '%s\0%s\0' "-C" "$path"
+  if [[ -n "$profile" ]]; then
+    printf '%s\0%s\0' "-p" "$profile"
+  fi
+}
+
+project_add() {
+  local name="${1:-}"
+  local path="${2:-}"
+  local profile="${3:-}"
+  [[ -n "$name" ]] || die "project name is required"
+  [[ -n "$path" ]] || die "project path is required"
+  [[ "$name" != *$'\t'* ]] || die "project name cannot contain tabs"
+  [[ "$path" = /* ]] || die "project path must be absolute"
+  [[ -d "$path" ]] || die "project path does not exist: $path"
+
+  local tmp
+  tmp="$(mktemp)"
+  awk -F '\t' -v name="$name" '$1 != name { print }' "$PROJECTS_FILE" > "$tmp"
+  printf '%s\t%s\t%s\n' "$name" "$path" "$profile" >> "$tmp"
+  mv "$tmp" "$PROJECTS_FILE"
+  printf '%s\n' "$name" > "$CURRENT_FILE"
+  printf 'Added project %s -> %s\n' "$name" "$path"
+}
+
+project_list() {
+  if [[ ! -s "$PROJECTS_FILE" ]]; then
+    printf 'No projects registered.\n'
+    return
+  fi
+  local current=""
+  [[ -s "$CURRENT_FILE" ]] && current="$(cat "$CURRENT_FILE")"
+  awk -F '\t' -v current="$current" '{
+    marker = ($1 == current) ? "*" : " "
+    profile = ($3 == "") ? "" : " profile=" $3
+    printf "%s %s\t%s%s\n", marker, $1, $2, profile
+  }' "$PROJECTS_FILE"
+}
+
+project_use() {
+  local name="${1:-}"
+  [[ -n "$name" ]] || die "project name is required"
+  project_row "$name" >/dev/null || die "unknown project: $name"
+  printf '%s\n' "$name" > "$CURRENT_FILE"
+  printf 'Current project: %s\n' "$name"
+}
+
+project_path_command() {
+  local name
+  name="$(resolve_project_name "${1:-}")"
+  project_path "$name"
+}
+
+codex_open() {
+  require_codex
+  local first="${1:-}"
+  local name
+  name="$(resolve_project_name "$first")"
+  if [[ "$first" == "$name" ]]; then
+    shift || true
+  fi
+  local args=()
+  while IFS= read -r -d '' arg; do
+    args+=("$arg")
+  done < <(codex_project_args "$name")
+  codex "${args[@]}" "$*"
+}
+
+codex_exec() {
+  require_codex
+  local first="${1:-}"
+  local name
+  name="$(resolve_project_name "$first")"
+  if [[ "$first" == "$name" ]]; then
+    shift || true
+  fi
+  [[ "$#" -gt 0 ]] || die "exec prompt is required"
+  local args=()
+  while IFS= read -r -d '' arg; do
+    args+=("$arg")
+  done < <(codex_project_args "$name")
+  codex exec "${args[@]}" "$*"
+}
+
+dispatch_prompt() {
+  local first="${1:-}"
+  local name
+  name="$(resolve_project_name "$first")"
+  if [[ "$first" == "$name" ]]; then
+    shift || true
+  fi
+  [[ "$#" -gt 0 ]] || die "dispatch goal is required"
+  local path
+  path="$(project_path "$name")"
+  cat <<EOF
+Use the Codex Conductor skill.
+
+Project:
+- name: $name
+- path: $path
+
+Goal:
+$*
+
+Act as the coordinator thread. Create or fork worker threads only when useful,
+give each worker a tight role, set clear thread titles, collect their results
+with read_thread, and synthesize the final answer in this thread.
+EOF
+}
+
+main() {
+  ensure_state
+  local command="${1:-help}"
+  shift || true
+  case "$command" in
+    help|-h|--help)
+      usage
+      ;;
+    project)
+      local subcommand="${1:-help}"
+      shift || true
+      case "$subcommand" in
+        add) project_add "$@" ;;
+        use) project_use "$@" ;;
+        current) current_project_name ;;
+        list) project_list ;;
+        path) project_path_command "$@" ;;
+        *) usage; exit 1 ;;
+      esac
+      ;;
+    open)
+      codex_open "$@"
+      ;;
+    exec)
+      codex_exec "$@"
+      ;;
+    resume)
+      require_codex
+      codex resume "$@"
+      ;;
+    fork)
+      require_codex
+      codex fork "$@"
+      ;;
+    dispatch)
+      dispatch_prompt "$@"
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
