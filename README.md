@@ -6,7 +6,7 @@
 
 Codex Conductor is a small orchestration layer for Codex. It packages a CLI,
 a Codex skill, and a prompt hook as a local Codex plugin so one Codex thread
-can coordinate project-scoped worker threads.
+can coordinate visible subagents and project-scoped worker threads.
 
 [中文说明](./README.zh-CN.md)
 
@@ -33,28 +33,31 @@ manifest and hook APIs may still change.
 - Opens or runs Codex CLI commands in the active project.
 - Generates dispatch prompts for Codex App coordinator threads.
 - Installs focused Codex skills for coordination, dispatch, project routing,
-  and worker result collection.
+  and execution result collection.
 - Installs a conservative `UserPromptSubmit` hook that suggests Conductor when
-  a prompt looks like multi-thread, multi-session, project, or worker
+  a prompt looks like multi-agent, multi-thread, multi-session, project, or worker
   orchestration work.
 
 Conductor does not run an MCP server. V1 intentionally uses Codex App's native
-thread tools for App-side orchestration.
+thread tools for durable App-side thread orchestration while keeping the
+dispatch protocol independent of any specific subagent implementation.
 
 ## Visible Dispatch Model
 
 Conductor keeps the current Codex thread as the coordinator. The coordinator
-does the session operations, but it makes the orchestration visible:
+makes orchestration visible no matter which execution capability it uses:
 
-1. Show a `Dispatch Plan` before creating or messaging workers.
-2. Create or fork user-visible worker threads for meaningful work units.
-3. Collect worker results and synthesize the final answer in the coordinator
+1. Show a `Dispatch Plan` before creating or messaging execution units.
+2. Dispatch visible subagents, worker threads, or collector units for meaningful
+   work units.
+3. Give every nested dispatch its own visible plan and fan-out budget.
+4. Collect child results and synthesize the final answer in the coordinator
    thread.
 
-The worker thread is the visible execution artifact. Conductor does not create a
-separate hidden session-operator agent just to perform thread API calls. A
-collector can be dispatched as a worker when result collection is substantial,
-but the coordinator remains responsible for the final synthesis.
+Visible subagents and worker threads are the execution artifacts. Conductor does
+not create a hidden session-operator just to perform thread API calls. A
+collector can be dispatched as a visible unit when result collection is
+substantial, but the coordinator remains responsible for the final synthesis.
 
 ## Requirements
 
@@ -143,7 +146,7 @@ hook.
 codex-conductor project add app ~/projects/my-app
 codex-conductor project use app
 codex-conductor project list
-codex-conductor dispatch "split this into db, backend, and ui worker threads"
+codex-conductor dispatch "split this into db, backend, and ui workers"
 ```
 
 Useful commands:
@@ -169,17 +172,17 @@ Set `CODEX_CONDUCTOR_HOME` to store CLI state somewhere other than
 In a new Codex App thread, try:
 
 ```text
-Use Codex Conductor to split this task into worker threads.
+Use Codex Conductor to split this task into visible workers.
 ```
 
 The installed skill guides the coordinator thread to:
 
 - find or target a project
-- show a concise dispatch plan before creating workers
-- create or fork worker threads
-- assign narrow worker roles
+- show a concise dispatch plan before creating execution units
+- dispatch visible subagents, worker threads, or collector units
+- assign narrow worker roles and fan-out budgets
 - set readable thread titles
-- collect worker results
+- collect child results
 - synthesize the final result in the coordinator thread
 
 The prompt hook only injects a recommendation. It does not create threads by

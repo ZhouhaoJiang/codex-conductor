@@ -1,24 +1,33 @@
 ---
 name: conductor-collector
-description: "Use when collecting results from worker Codex threads and synthesizing a coordinator-thread answer."
+description: "Use when collecting results from visible subagents or worker Codex threads and synthesizing a coordinator-thread answer."
 ---
 
 # Conductor Collector
 
-Use this skill after worker threads have been created, forked, or messaged and
-the coordinator needs to collect their outputs.
+Use this skill after visible subagents or worker threads have been created,
+forked, or messaged and the coordinator needs to collect their outputs.
+
+A collector may be dispatched as a visible unit when there are enough child
+units or enough evidence that collection should be inspectable on its own. In
+that mode, the collector summarizes evidence and blockers only. The coordinator
+thread still owns the final synthesis and decision.
 
 ## Collection Workflow
 
-1. Read each worker with `read_thread`.
+1. Read each thread worker with `read_thread` and collect each visible subagent
+   through the available subagent collection mechanism.
 2. Separate completed findings from blockers.
 3. Preserve concise evidence such as commands, files, diffs, or error text.
-4. Do not paste long worker transcripts unless the user asks.
-5. Produce the final answer from this coordinator thread.
+4. Do not paste long transcripts unless the user asks.
+5. If acting as a collector unit, report a concise evidence summary back to
+   the coordinator.
+6. If acting as the coordinator, produce the final answer from this coordinator
+   thread.
 
 ## Synthesis Format
 
 - Start with the outcome.
-- List worker findings only when they materially affect the conclusion.
+- List child-unit findings only when they materially affect the conclusion.
 - Name unresolved blockers separately.
 - Include verification status for any code or CLI behavior.

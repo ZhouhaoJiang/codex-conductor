@@ -9,11 +9,12 @@ Codex Conductor is a local Codex plugin that pairs:
 - a small CLI for project-scoped Codex workflows
 - focused Codex skills for App-side thread orchestration
 - a prompt hook that suggests Conductor when a prompt looks like
-  multi-thread, worker, project, or session orchestration work
+  multi-agent, multi-thread, worker, project, or session orchestration work
 
 The CLI keeps human terminal workflows fast. The skill lets any Codex App
-session act as a coordinator that can create, fork, message, read, and summarize
-worker threads through Codex App's native thread tools.
+session act as a coordinator that can dispatch visible subagents, create or
+message worker threads through Codex App's native thread tools, and summarize
+child results.
 
 This is an experimental `0.1.x` plugin. The CLI and install flow are usable,
 but Codex plugin manifest and hook APIs may still change.
@@ -32,13 +33,13 @@ commands and plugin trust prompt when Codex asks.
 ## Visible Dispatch Model
 
 The current Codex thread stays responsible for coordination. Before creating or
-messaging workers, it should show a concise `Dispatch Plan` that names each
-worker, target, deliverable, and expected evidence.
+messaging execution units, it should show a concise `Dispatch Plan` that names
+each unit, kind, target, deliverable, expected evidence, and fan-out budget.
 
-Worker threads are the user-visible execution units. Conductor does not add a
-hidden session-operator agent just to call thread APIs. A collector can be a
-worker when synthesis is large enough to show separately, while the coordinator
-still owns the final answer.
+Visible subagents and worker threads are the execution units. Conductor does not
+add a hidden session-operator just to call thread APIs. A collector can be a
+visible unit when synthesis is large enough to show separately, while the
+coordinator still owns the final answer.
 
 ## Install
 
@@ -72,7 +73,7 @@ codex-conductor project add app ~/projects/my-app
 codex-conductor project use app
 codex-conductor project list
 codex-conductor open "inspect the current task context"
-codex-conductor dispatch "split this into db, backend, and ui worker threads"
+codex-conductor dispatch "split this into db, backend, and ui workers"
 ```
 
 Set `CODEX_CONDUCTOR_HOME` to keep state somewhere other than
@@ -83,12 +84,12 @@ Set `CODEX_CONDUCTOR_HOME` to keep state somewhere other than
 After installing the plugin, start a new Codex thread and say:
 
 ```text
-Use Codex Conductor to split this task into worker threads.
+Use Codex Conductor to split this task into visible workers.
 ```
 
 The companion skill tells Codex how to use the built-in App thread tools rather
 than requiring a separate MCP server. It also keeps dispatch visible by showing
-a plan before it creates or messages worker threads.
+a plan before it creates or messages visible execution units.
 
 ## Skills And Hook
 

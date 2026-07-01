@@ -6,7 +6,7 @@
 
 Codex Conductor 是一个面向 Codex 的轻量调度层。它把 CLI、Codex skill
 和 prompt hook 打包成一个本地 Codex plugin，让任意一个 Codex 线程都能作为
-主控线程，去协调项目级 worker threads。
+主控线程，去协调可见 subagents 和项目级 worker threads。
 
 [English README](./README.md)
 
@@ -31,26 +31,28 @@ Codex Conductor 目前是实验性的 `0.1.x` 本地插件。CLI 和插件安装
 - 在终端里注册和切换本地项目。
 - 在当前项目里打开或运行 Codex CLI。
 - 生成适合丢进 Codex App 主控线程的 dispatch prompt。
-- 安装多个聚焦的 Codex skills，分别处理调度、项目路由和 worker 结果收集。
+- 安装多个聚焦的 Codex skills，分别处理调度、项目路由和执行结果收集。
 - 安装一个保守的 `UserPromptSubmit` hook。当你的 prompt 像是多线程、多
-  session、project 或 worker 调度任务时，它会提醒 agent 可以考虑使用
-  Conductor。
+  agent、多 session、project 或 worker 调度任务时，它会提醒 agent 可以考虑
+  使用 Conductor。
 
 Conductor 不启动 MCP server。V1 刻意保持简单，App 侧调度优先使用 Codex
-App 原生线程工具。
+App 原生线程工具，同时保持调度协议不绑定任何具体 subagent 实现。
 
 ## 可见调度模型
 
-Conductor 保持当前 Codex thread 作为主控线程。主控线程负责 session 操作，
-但调度过程要对用户可见：
+Conductor 保持当前 Codex thread 作为主控线程。不管底层使用哪种执行能力，
+调度过程都要对用户可见：
 
-1. 创建或发送 worker 前，先展示 `Dispatch Plan`。
-2. 为有意义的工作单元创建或 fork 用户可见的 worker threads。
-3. 收集 worker 结果，并在主控线程里汇总最终答案。
+1. 创建或发送执行单元前，先展示 `Dispatch Plan`。
+2. 为有意义的工作单元派发可见 subagents、worker threads 或 collector units。
+3. 每一次 nested dispatch 都要有自己的可见计划和 fan-out budget。
+4. 收集子任务结果，并在主控线程里汇总最终答案。
 
-worker thread 本身就是可见的执行产物。Conductor 不额外创建一个隐藏的
-session-operator agent，只为了代替主控线程调用 thread API。结果收集本身很重
-时，可以把 collector 派发成一个 worker，但最终汇总和裁决仍由主控线程负责。
+可见 subagent 和 worker thread 本身就是执行产物。Conductor 不额外创建一个
+隐藏的 session-operator，只为了代替主控线程调用 thread API。结果收集本身很重
+时，可以把 collector 派发成一个可见执行单元，但最终汇总和裁决仍由主控线程
+负责。
 
 ## 环境要求
 
@@ -164,17 +166,17 @@ codex-conductor dispatch [name] <goal...>
 新开一个 Codex App thread 后，可以说：
 
 ```text
-Use Codex Conductor to split this task into worker threads.
+Use Codex Conductor to split this task into visible workers.
 ```
 
 安装后的 skill 会指导主控线程：
 
 - 查找或锁定目标项目
-- 创建 worker 前展示简短的 dispatch plan
-- 创建或 fork worker threads
-- 给每个 worker 分配清晰角色
+- 创建执行单元前展示简短的 dispatch plan
+- 派发可见 subagents、worker threads 或 collector units
+- 给每个 worker 分配清晰角色和 fan-out budget
 - 设置可读的线程标题
-- 收集 worker 结果
+- 收集子任务结果
 - 在主控线程里汇总最终结论
 
 prompt hook 只负责注入提醒，不会自己创建线程。

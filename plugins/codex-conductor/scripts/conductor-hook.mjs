@@ -120,8 +120,10 @@ Before doing broad orchestration, briefly decide whether this task should use
 Codex Conductor. If useful, ask the user for confirmation in one short sentence
 or proceed when they explicitly asked for multi-thread/session dispatch.
 
-Use the conductor skill when accepted. Prefer native Codex App thread tools for
-App-side orchestration, and keep the current thread as the coordinator.`;
+Use the conductor skill when accepted. Keep the current thread as the
+coordinator, use visible subagent or thread capabilities exposed by this Codex
+environment, and show a concise Dispatch Plan before creating or messaging
+execution units.`;
 }
 
 function formatAdditionalContext(additionalContext) {

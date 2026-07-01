@@ -78,11 +78,39 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt did not include the goal\n' >&2
   exit 1
 }
+[[ "$dispatch" == *"Dispatch Plan"* ]] || {
+  printf 'dispatch prompt did not mention the visible dispatch plan\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"visible subagents"* ]] || {
+  printf 'dispatch prompt did not mention visible subagents\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"user-visible execution evidence"* ]] || {
+  printf 'dispatch prompt did not describe visible execution evidence\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"fan-out budget"* ]] || {
+  printf 'dispatch prompt did not mention fan-out budget\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"session-operator"* ]] || {
+  printf 'dispatch prompt did not reject session-operator dispatch\n' >&2
+  exit 1
+}
 
 hook_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"把这个任务拆成多个 worker 并行跑"}'
 hook_output="$(printf '%s' "$hook_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
 [[ "$hook_output" == *"codex-conductor-recommendation"* ]] || {
   printf 'hook did not recommend conductor for orchestration prompt\n' >&2
+  exit 1
+}
+[[ "$hook_output" == *"Dispatch Plan"* ]] || {
+  printf 'hook recommendation did not mention the visible dispatch plan\n' >&2
+  exit 1
+}
+[[ "$hook_output" == *"visible subagent"* ]] || {
+  printf 'hook recommendation did not mention visible subagents\n' >&2
   exit 1
 }
 
