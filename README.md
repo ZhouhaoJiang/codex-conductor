@@ -26,15 +26,61 @@ manifest and hook APIs may still change.
 Conductor does not run an MCP server. V1 intentionally uses Codex App's native
 thread tools for App-side orchestration.
 
+## Visible Dispatch Model
+
+Conductor keeps the current Codex thread as the coordinator. The coordinator
+does the session operations, but it makes the orchestration visible:
+
+1. Show a `Dispatch Plan` before creating or messaging workers.
+2. Create or fork user-visible worker threads for meaningful work units.
+3. Collect worker results and synthesize the final answer in the coordinator
+   thread.
+
+The worker thread is the visible execution artifact. Conductor does not create a
+separate hidden session-operator agent just to perform thread API calls. A
+collector can be dispatched as a worker when result collection is substantial,
+but the coordinator remains responsible for the final synthesis.
+
 ## Requirements
 
 - macOS or Linux shell environment
 - Codex CLI installed and authenticated, with plugin install commands available
 - Node.js on `PATH` for the prompt hook
 
-## One-Command Install
+## Install
 
-Clone the repository and run:
+### Native Codex Install
+
+After this repository is published, install the marketplace with Codex's native
+plugin commands:
+
+```bash
+codex plugin marketplace add <owner>/codex-conductor
+codex plugin add codex-conductor@codex-conductor
+```
+
+For a local clone, use the clone path as the marketplace root:
+
+```bash
+git clone <repo-url> codex-conductor
+cd codex-conductor
+codex plugin marketplace add "$PWD"
+codex plugin add codex-conductor@codex-conductor
+```
+
+Then link the optional CLI:
+
+```bash
+mkdir -p ~/.local/bin
+ln -sf "$PWD/plugins/codex-conductor/bin/codex-conductor" ~/.local/bin/codex-conductor
+```
+
+Open `/plugins` in Codex App if you prefer to install from the plugin UI after
+adding the marketplace.
+
+### Convenience Installer
+
+`./install.sh` wraps the native commands above and also links the CLI:
 
 ```bash
 ./install.sh
@@ -71,6 +117,8 @@ Preview the commands without changing anything:
 ```bash
 ./install.sh --dry-run
 ```
+
+`--dry-run` is a verification tool, not an installation step.
 
 After installation, start a new Codex thread so Codex loads the new skill and
 hook.
@@ -113,6 +161,7 @@ Use Codex Conductor to split this task into worker threads.
 The installed skill guides the coordinator thread to:
 
 - find or target a project
+- show a concise dispatch plan before creating workers
 - create or fork worker threads
 - assign narrow worker roles
 - set readable thread titles
@@ -141,7 +190,10 @@ plugins/codex-conductor/
   skills/conductor-collector/SKILL.md
 ```
 
-## Verification
+## Development Verification
+
+These commands are for contributors validating a local checkout. They are not
+the user install path.
 
 Run:
 

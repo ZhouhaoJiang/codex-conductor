@@ -4,12 +4,22 @@ Thanks for helping improve Codex Conductor.
 
 ## Development Setup
 
-Run the project from a local clone:
+Install a local checkout with Codex's native marketplace flow:
+
+```bash
+codex plugin marketplace add "$PWD"
+codex plugin add codex-conductor@codex-conductor
+```
+
+Run validation commands from the repository root:
 
 ```bash
 ./install.sh --dry-run
 plugins/codex-conductor/scripts/smoke-test
 ```
+
+`./install.sh --dry-run` previews the convenience installer; it does not install
+the plugin.
 
 Use a real install only when you want Codex to load the updated plugin:
 

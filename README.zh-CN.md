@@ -24,15 +24,58 @@ Codex Conductor 目前是实验性的 `0.1.x` 本地插件。CLI 和插件安装
 Conductor 不启动 MCP server。V1 刻意保持简单，App 侧调度优先使用 Codex
 App 原生线程工具。
 
+## 可见调度模型
+
+Conductor 保持当前 Codex thread 作为主控线程。主控线程负责 session 操作，
+但调度过程要对用户可见：
+
+1. 创建或发送 worker 前，先展示 `Dispatch Plan`。
+2. 为有意义的工作单元创建或 fork 用户可见的 worker threads。
+3. 收集 worker 结果，并在主控线程里汇总最终答案。
+
+worker thread 本身就是可见的执行产物。Conductor 不额外创建一个隐藏的
+session-operator agent，只为了代替主控线程调用 thread API。结果收集本身很重
+时，可以把 collector 派发成一个 worker，但最终汇总和裁决仍由主控线程负责。
+
 ## 环境要求
 
 - macOS 或 Linux shell
 - 已安装并登录 Codex CLI，并且该 CLI 支持 plugin 安装命令
 - `PATH` 中有 Node.js，用于运行 prompt hook
 
-## 一键安装
+## 安装
 
-克隆仓库后运行：
+### Codex 原生命令安装
+
+仓库发布后，用 Codex 原生 plugin 命令安装 marketplace：
+
+```bash
+codex plugin marketplace add <owner>/codex-conductor
+codex plugin add codex-conductor@codex-conductor
+```
+
+如果是本地 clone，用 clone 目录作为 marketplace root：
+
+```bash
+git clone <repo-url> codex-conductor
+cd codex-conductor
+codex plugin marketplace add "$PWD"
+codex plugin add codex-conductor@codex-conductor
+```
+
+然后链接可选 CLI：
+
+```bash
+mkdir -p ~/.local/bin
+ln -sf "$PWD/plugins/codex-conductor/bin/codex-conductor" ~/.local/bin/codex-conductor
+```
+
+如果你更喜欢 UI 流程，可以添加 marketplace 后在 Codex App 里打开
+`/plugins`，从插件页安装。
+
+### 便捷安装脚本
+
+`./install.sh` 只是把上面的原生命令包了一层，并顺手链接 CLI：
 
 ```bash
 ./install.sh
@@ -68,6 +111,8 @@ CODEX_BIN=/Applications/Codex.app/Contents/Resources/codex ./install.sh
 ```bash
 ./install.sh --dry-run
 ```
+
+`--dry-run` 是验证工具，不是安装步骤。
 
 安装完成后，请新开一个 Codex thread，让 Codex 重新加载 plugin skill 和
 hook。
@@ -110,6 +155,7 @@ Use Codex Conductor to split this task into worker threads.
 安装后的 skill 会指导主控线程：
 
 - 查找或锁定目标项目
+- 创建 worker 前展示简短的 dispatch plan
 - 创建或 fork worker threads
 - 给每个 worker 分配清晰角色
 - 设置可读的线程标题
@@ -137,7 +183,9 @@ plugins/codex-conductor/
   skills/conductor-collector/SKILL.md
 ```
 
-## 验证
+## 开发验证
+
+这些命令是给贡献者验证本地 checkout 用的，不是用户安装路径。
 
 运行：
 

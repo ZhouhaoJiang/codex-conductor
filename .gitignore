@@ -1,5 +1,6 @@
 .DS_Store
 .codegraph
+.omo/
 *.log
 node_modules/
 .codex-conductor/

@@ -2,6 +2,13 @@
 
 All notable changes to Codex Conductor will be documented in this file.
 
+## 0.1.4 - 2026-07-01
+
+- Documented Codex's native marketplace install flow separately from developer
+  verification commands.
+- Clarified that `./install.sh` is a convenience wrapper and `--dry-run` is not
+  an installation step.
+
 ## 0.1.3 - 2026-07-01
 
 - Added open-source project governance files: contributing guide, security

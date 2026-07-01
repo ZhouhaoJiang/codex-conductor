@@ -67,20 +67,29 @@ When that happens:
 1. Restate the coordination goal in one short sentence.
 2. If the target project is unclear, call `list_projects` and choose the closest
    project from the user's wording. Ask only if there is real ambiguity.
-3. Decide whether to use:
+3. Before creating or messaging workers, show a concise `Dispatch Plan` in the
+   coordinator thread. The plan should list each visible worker, its target
+   project or cwd, exact deliverable, expected evidence, and whether it may make
+   changes.
+4. Decide whether to use:
    - `fork_thread` for workers that need the coordinator's completed context
    - `create_thread` for independent project-scoped workers
    - `send_message_to_thread` for an existing worker
-4. Keep worker prompts tight. Each worker needs:
+5. Keep worker prompts tight. Each worker needs:
    - role
    - project or cwd
    - exact deliverable
    - verification expected
    - instruction to report concise evidence back
-5. Set readable titles with `set_thread_title`.
-6. Use `read_thread` to collect results. Include outputs only when evidence is
+6. Treat worker threads as the user-visible execution units. Do not hide
+   meaningful work behind a single coordinator message.
+7. Set readable titles with `set_thread_title`.
+8. Use `read_thread` to collect results. Include outputs only when evidence is
    necessary.
-7. Synthesize in the coordinator thread. Name unresolved blockers separately
+9. Optionally create a collector worker when result collection itself is large
+   enough to be worth making visible. The collector summarizes evidence; the
+   coordinator still owns the final synthesis and decision.
+10. Synthesize in the coordinator thread. Name unresolved blockers separately
    from completed worker findings.
 
 ## Worker Prompt Template
@@ -91,6 +100,7 @@ You are a Codex Conductor worker.
 Role: <role>
 Project: <project name or path>
 Coordinator thread: <thread id or title if available>
+Visibility: Your thread is user-visible execution evidence for this dispatch.
 
 Task:
 <specific task>
@@ -126,7 +136,10 @@ If the CLI is not on `PATH`, run it from the plugin directory:
 ## Guardrails
 
 - Keep the coordinator responsible for final synthesis.
+- Make dispatch visible before creating workers.
 - Do not spawn workers for tiny tasks.
+- Do not create a separate session-operator worker just to perform session API
+  calls; dispatch meaningful work units instead.
 - Do not send broad, identical prompts to many workers.
 - Do not rely on active unfinished turns when forking; forks only contain
   completed history.

@@ -137,7 +137,16 @@ if [[ "$INSTALL_CLI" -eq 1 ]]; then
   esac
 fi
 
-cat <<EOF
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  cat <<EOF
+
+Codex Conductor dry-run complete. No changes were made.
+
+Commands above show what a real install would run.
+
+EOF
+else
+  cat <<EOF
 
 Codex Conductor installed.
 
@@ -147,3 +156,4 @@ Next steps:
   3. CLI: codex-conductor help
 
 EOF
+fi
