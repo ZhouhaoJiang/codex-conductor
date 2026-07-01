@@ -130,6 +130,7 @@ proceed when the user explicitly requested dispatch.
 Examples that should trigger it:
 
 - "CCC 帮我拆成 worker 跑"
+- "帮我看看这个问题 CCC"
 - "codex con collect workers"
 - "把这个任务拆成多个 worker 并行跑"
 - "跨 session 调度一下这个项目"

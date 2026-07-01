@@ -211,8 +211,10 @@ The installed skill guides the coordinator thread to:
 The prompt hook only injects a recommendation. It does not create threads by
 itself.
 
-Shortcut prompts also trigger the hook when they start with `CCC`, `/ccc`,
-`codex conductor`, `codex-conductor`, `codex con`, or `conductor`.
+`CCC` and `/ccc` act as magic words and trigger the hook when they appear as
+standalone tokens anywhere in the prompt. Shortcut prompts also trigger when
+they start with `codex conductor`, `codex-conductor`, `codex con`, or
+`conductor`.
 
 ## Repository Layout
 

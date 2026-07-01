@@ -203,7 +203,8 @@ Use Codex Conductor to split this task into visible workers.
 
 prompt hook 只负责注入提醒，不会自己创建线程。
 
-快捷 prompt 也会触发 hook，例如以 `CCC`、`/ccc`、`codex conductor`、
+`CCC` 和 `/ccc` 是魔法词，只要作为独立 token 出现在 prompt 任意位置就会触发
+hook。其他快捷 prompt 也会触发 hook，例如以 `codex conductor`、
 `codex-conductor`、`codex con` 或 `conductor` 开头。
 
 ## 项目结构

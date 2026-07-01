@@ -6,8 +6,11 @@ import { stdin, stdout } from "node:process";
 const CONDUCTOR_MARKER = "<codex-conductor-recommendation>";
 const MIN_SCORE = 2;
 
+const MAGIC_WORD_PATTERNS = [
+	/(?:^|[^A-Za-z0-9_])\/?ccc(?=$|[^A-Za-z0-9_])/i,
+];
+
 const SHORTCUT_PATTERNS = [
-	/^\s*\/?ccc(?:\s|:|：|$)/i,
 	/^\s*\/?codex[-_\s]+conductor(?:\s|:|：|$)/i,
 	/^\s*\/?codex[-_\s]+con(?:\s|:|：|$)/i,
 	/^\s*\/?conductor(?:\s|:|：|$)/i,
@@ -82,7 +85,7 @@ function parseInput(rawInput) {
 }
 
 function shouldRecommend(prompt) {
-	if (isShortcutCommand(prompt)) return true;
+	if (hasMagicWord(prompt) || isShortcutCommand(prompt)) return true;
 
 	let score = 0;
 	for (const pattern of STRONG_PATTERNS) {
@@ -92,6 +95,10 @@ function shouldRecommend(prompt) {
 		if (pattern.test(prompt)) score += 1;
 	}
 	return score >= MIN_SCORE;
+}
+
+function hasMagicWord(prompt) {
+	return MAGIC_WORD_PATTERNS.some((pattern) => pattern.test(prompt));
 }
 
 function isShortcutCommand(prompt) {

@@ -121,6 +121,27 @@ shortcut_output="$(printf '%s' "$shortcut_payload" | node "$PLUGIN_DIR/scripts/c
   exit 1
 }
 
+middle_magic_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"帮我看看这个问题 CCC"}'
+middle_magic_output="$(printf '%s' "$middle_magic_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$middle_magic_output" == *"codex-conductor-recommendation"* ]] || {
+  printf 'hook did not recommend conductor for sentence-final CCC magic word\n' >&2
+  exit 1
+}
+
+inline_magic_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"帮我用CCC看一下"}'
+inline_magic_output="$(printf '%s' "$inline_magic_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$inline_magic_output" == *"codex-conductor-recommendation"* ]] || {
+  printf 'hook did not recommend conductor for inline CCC magic word\n' >&2
+  exit 1
+}
+
+embedded_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"fix accc typo"}'
+embedded_output="$(printf '%s' "$embedded_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ -z "$embedded_output" ]] || {
+  printf 'hook recommended conductor for embedded ccc text\n' >&2
+  exit 1
+}
+
 codex_con_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"codex con collect workers"}'
 codex_con_output="$(printf '%s' "$codex_con_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
 [[ "$codex_con_output" == *"codex-conductor-recommendation"* ]] || {
