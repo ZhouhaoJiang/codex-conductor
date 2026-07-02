@@ -94,6 +94,14 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt did not mention fan-out budget\n' >&2
   exit 1
 }
+[[ "$dispatch" == *"Prefer Codex App thread units for project sessions"* ]] || {
+  printf 'dispatch prompt did not prefer project session threads\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"Do not send those through a subagent first"* ]] || {
+  printf 'dispatch prompt did not prevent subagent-first project sessions\n' >&2
+  exit 1
+}
 [[ "$dispatch" == *"session-operator"* ]] || {
   printf 'dispatch prompt did not reject session-operator dispatch\n' >&2
   exit 1

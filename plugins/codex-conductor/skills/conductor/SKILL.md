@@ -47,6 +47,19 @@ coordination, use native Codex App thread tools:
 Use the CLI for terminal-side project registry and prompt generation. Keep
 Conductor's protocol independent of any specific subagent implementation.
 
+## Execution Unit Selection
+
+- Default to Codex App thread units when the user asks for a project session,
+  worker session, thread, durable worker, code changes in a project, or
+  project-scoped execution. Do not route those requests through a subagent first.
+- Use visible subagents for short-lived sidecar work, parallel exploration, or
+  execution in environments where thread creation is not available or not
+  useful.
+- A subagent should create child project sessions only when its prompt
+  explicitly assigns it a shard-leader role, gives it a fan-out budget, and the
+  current environment exposes thread tools. Otherwise, it should finish its own
+  assigned work and report back to the coordinator.
+
 ## Hook Recommendation Behavior
 
 The plugin may inject a `codex-conductor-recommendation` context note on
@@ -75,9 +88,9 @@ When that happens:
    deliverable, expected evidence, whether it may make changes, and any fan-out
    budget.
 4. Decide whether each unit should be:
-   - a visible subagent or shard leader for a broad slice that may need nested
-     dispatch
    - a worker thread for durable, project-scoped execution
+   - a visible subagent for short-lived sidecar work or exploration
+   - a shard leader only when it is explicitly allowed to create child sessions
    - an existing worker that should receive a follow-up message
 5. For Codex App thread units, decide whether to use:
    - `fork_thread` for thread units that need the coordinator's completed context

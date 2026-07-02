@@ -17,6 +17,11 @@ coordinator and distribute work across visible execution units.
 - Prefer narrow ownership slices over broad duplicate prompts.
 - Give each unit a kind, project or cwd, concrete deliverable, expected
   evidence, and fan-out budget.
+- Prefer Codex App thread units for project sessions, worker sessions, durable
+  workers, project-scoped code changes, or any task where the user expects a
+  separate session. Do not send those through a subagent first.
+- Use visible subagents for short-lived sidecar work, parallel exploration, or
+  when thread creation is not available or not useful.
 - Treat visible subagents and worker threads as user-visible execution units for
   the dispatch.
 - Do not create a separate session-operator just to perform thread API calls.

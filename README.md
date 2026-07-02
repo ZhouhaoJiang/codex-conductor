@@ -59,6 +59,11 @@ not create a hidden session-operator just to perform thread API calls. A
 collector can be dispatched as a visible unit when result collection is
 substantial, but the coordinator remains responsible for the final synthesis.
 
+When work is project-scoped, durable, or expected to live in its own session,
+Conductor should prefer Codex App thread units directly. Visible subagents are
+for short-lived sidecar work or exploration, not an extra hop before opening a
+project session.
+
 ## Requirements
 
 - macOS or Linux shell environment

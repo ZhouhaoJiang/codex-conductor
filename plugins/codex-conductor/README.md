@@ -41,6 +41,10 @@ add a hidden session-operator just to call thread APIs. A collector can be a
 visible unit when synthesis is large enough to show separately, while the
 coordinator still owns the final answer.
 
+For project-scoped, durable, or separate-session work, prefer Codex App thread
+units directly. Visible subagents are for short-lived sidecar work or
+exploration, not an extra hop before opening a project session.
+
 ## Install
 
 Install the plugin through the Git marketplace:

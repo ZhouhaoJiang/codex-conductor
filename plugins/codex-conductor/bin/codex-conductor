@@ -188,10 +188,14 @@ show a concise Dispatch Plan that lists each visible unit, kind (subagent,
 thread, or collector), target project or cwd, deliverable, expected evidence,
 whether changes are allowed, and fan-out budget.
 
-Dispatch visible subagents or create/fork worker threads only for meaningful
-work units. Treat them as user-visible execution evidence, set clear titles
-where supported, and do not create a separate session-operator just to call
-thread APIs.
+Prefer Codex App thread units for project sessions, worker sessions, durable
+workers, project-scoped code changes, or any task where a separate session is
+expected. Do not send those through a subagent first.
+
+Dispatch visible subagents only for short-lived sidecar work, parallel
+exploration, or when thread creation is not available or not useful. Treat all
+units as user-visible execution evidence, set clear titles where supported, and
+do not create a separate session-operator just to call thread APIs.
 
 Allow nested dispatch only when a child unit first shows its own Dispatch Plan,
 stays within its fan-out budget, and reports child evidence back to you.

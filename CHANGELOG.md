@@ -2,6 +2,11 @@
 
 All notable changes to Codex Conductor will be documented in this file.
 
+## Unreleased
+
+- Clarified Conductor dispatch selection so project/session work prefers Codex
+  App thread units directly instead of routing through subagents first.
+
 ## 0.1.7 - 2026-07-01
 
 - Generalized Conductor dispatch from thread-only workers to visible execution
