@@ -9,6 +9,9 @@ All notable changes to Codex Conductor will be documented in this file.
 - Added Conductor + ULW pairing guidance to Conductor-triggered prompts,
   reducing the need to type `CCC ULW` manually without widening the hook trigger
   surface to generic delivery prompts.
+- Changed plugin icon metadata to use packaged asset paths instead of inline
+  data URIs so Codex App can resolve the Conductor logo like other local
+  plugins.
 
 ## 0.1.7 - 2026-07-01
 

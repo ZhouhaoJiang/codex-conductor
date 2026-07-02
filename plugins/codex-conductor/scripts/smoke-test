@@ -16,11 +16,24 @@ const { join } = require("node:path");
 const pluginDir = process.env.PLUGIN_DIR;
 const manifestPath = join(pluginDir, ".codex-plugin", "plugin.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+const iconFields = ["composerIcon", "logo"];
 const hookPaths = Array.isArray(manifest.hooks)
   ? manifest.hooks
   : typeof manifest.hooks === "string"
     ? [manifest.hooks]
     : [];
+
+for (const field of iconFields) {
+  const value = manifest.interface?.[field];
+  if (typeof value !== "string" || !value.startsWith("./assets/")) {
+    throw new Error(`plugin interface.${field} must point at a packaged asset path`);
+  }
+
+  const assetPath = join(pluginDir, value.replace(/^\.\//, ""));
+  if (!existsSync(assetPath)) {
+    throw new Error(`plugin interface.${field} references missing asset: ${value}`);
+  }
+}
 
 if (hookPaths.length === 0) {
   throw new Error("plugin manifest must declare hook manifest paths in .codex-plugin/plugin.json");
