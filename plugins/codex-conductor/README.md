@@ -131,6 +131,11 @@ itself. It only injects a short recommendation when the user's prompt strongly
 looks like orchestration work, so the agent can ask whether to use Conductor or
 proceed when the user explicitly requested dispatch.
 
+When a prompt already triggers Conductor through `CCC`, a shortcut, or a
+worker/session/project-shaped request, the hook also recommends pairing
+Conductor with ULW for delivery-shaped work. This keeps the trigger surface
+predictable while letting `CCC ...` replace the heavier `CCC ULW ...` habit.
+
 Examples that should trigger it:
 
 - "CCC 帮我拆成 worker 跑"
@@ -138,6 +143,7 @@ Examples that should trigger it:
 - "codex con collect workers"
 - "把这个任务拆成多个 worker 并行跑"
 - "跨 session 调度一下这个项目"
+- "CCC 修复提交，并更新本地的插件"
 - "fork 几个线程分别查 DB/backend/frontend"
 
 Examples that should not trigger it:

@@ -6,6 +6,9 @@ All notable changes to Codex Conductor will be documented in this file.
 
 - Clarified Conductor dispatch selection so project/session work prefers Codex
   App thread units directly instead of routing through subagents first.
+- Added Conductor + ULW pairing guidance to Conductor-triggered prompts,
+  reducing the need to type `CCC ULW` manually without widening the hook trigger
+  surface to generic delivery prompts.
 
 ## 0.1.7 - 2026-07-01
 

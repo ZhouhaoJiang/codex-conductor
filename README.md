@@ -216,6 +216,11 @@ The installed skill guides the coordinator thread to:
 The prompt hook only injects a recommendation. It does not create threads by
 itself.
 
+When a prompt already triggers Conductor through `CCC`, a shortcut, or a
+worker/session/project-shaped request, the hook also recommends pairing
+Conductor with ULW for delivery-shaped work. This keeps the trigger surface
+predictable while letting `CCC ...` replace the heavier `CCC ULW ...` habit.
+
 `CCC` and `/ccc` act as magic words and trigger the hook when they appear as
 standalone tokens anywhere in the prompt. Shortcut prompts also trigger when
 they start with `codex conductor`, `codex-conductor`, `codex con`, or

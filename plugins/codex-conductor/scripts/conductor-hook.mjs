@@ -127,10 +127,14 @@ Before doing broad orchestration, briefly decide whether this task should use
 Codex Conductor. If useful, ask the user for confirmation in one short sentence
 or proceed when they explicitly asked for multi-thread/session dispatch.
 
-Use the conductor skill when accepted. Keep the current thread as the
-coordinator, use visible subagent or thread capabilities exposed by this Codex
-environment, and show a concise Dispatch Plan before creating or messaging
-execution units.`;
+When the accepted work is implementation, commit, plugin, project-session, or
+other delivery-shaped work, pair Conductor with ULW: use the conductor skill for
+dispatch/session coordination and use the ulw-loop skill's evidence-bound
+execution discipline. For tiny read-only questions, keep it lightweight.
+
+When Conductor is accepted, keep the current thread as the coordinator, use
+visible subagent or thread capabilities exposed by this Codex environment, and
+show a concise Dispatch Plan before creating or messaging execution units.`;
 }
 
 function formatAdditionalContext(additionalContext) {

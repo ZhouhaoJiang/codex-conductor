@@ -207,6 +207,10 @@ Use Codex Conductor to split this task into visible workers.
 
 prompt hook 只负责注入提醒，不会自己创建线程。
 
+当 prompt 已经通过 `CCC`、快捷命令，或 worker/session/project 类请求触发
+Conductor 时，hook 会额外提示交付型工作可以配合 ULW 使用。这样触发表面仍然
+可预期，但 `CCC ...` 就可以替代更重的 `CCC ULW ...` 习惯。
+
 `CCC` 和 `/ccc` 是魔法词，只要作为独立 token 出现在 prompt 任意位置就会触发
 hook。其他快捷 prompt 也会触发 hook，例如以 `codex conductor`、
 `codex-conductor`、`codex con` 或 `conductor` 开头。

@@ -121,6 +121,28 @@ hook_output="$(printf '%s' "$hook_payload" | node "$PLUGIN_DIR/scripts/conductor
   printf 'hook recommendation did not mention visible subagents\n' >&2
   exit 1
 }
+[[ "$hook_output" == *"ulw-loop"* ]] || {
+  printf 'hook recommendation did not mention ulw-loop pairing\n' >&2
+  exit 1
+}
+
+workflow_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"修复提交，并更新本地的插件"}'
+workflow_output="$(printf '%s' "$workflow_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ -z "$workflow_output" ]] || {
+  printf 'hook recommended conductor for plain delivery prompt without a conductor selector\n' >&2
+  exit 1
+}
+
+ccc_workflow_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 修复提交，并更新本地的插件"}'
+ccc_workflow_output="$(printf '%s' "$ccc_workflow_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$ccc_workflow_output" == *"codex-conductor-recommendation"* ]] || {
+  printf 'hook did not recommend conductor for CCC delivery prompt\n' >&2
+  exit 1
+}
+[[ "$ccc_workflow_output" == *"pair Conductor with ULW"* ]] || {
+  printf 'hook did not recommend combined Conductor + ULW workflow for CCC delivery prompt\n' >&2
+  exit 1
+}
 
 shortcut_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 帮我拆成 worker 跑"}'
 shortcut_output="$(printf '%s' "$shortcut_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
