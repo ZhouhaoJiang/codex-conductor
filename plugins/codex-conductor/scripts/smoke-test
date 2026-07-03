@@ -157,6 +157,17 @@ ccc_workflow_output="$(printf '%s' "$ccc_workflow_payload" | node "$PLUGIN_DIR/s
   exit 1
 }
 
+ccc_project_session_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 给 hr-ai 起一个 project session 修这个问题"}'
+ccc_project_session_output="$(printf '%s' "$ccc_project_session_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ "$ccc_project_session_output" == *"Default to Codex App thread units for project sessions"* ]] || {
+  printf 'hook recommendation did not default project sessions to thread units\n' >&2
+  exit 1
+}
+[[ "$ccc_project_session_output" == *"Do not dispatch a subagent just to create a project session"* ]] || {
+  printf 'hook recommendation did not prevent subagent-first project sessions\n' >&2
+  exit 1
+}
+
 shortcut_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 帮我拆成 worker 跑"}'
 shortcut_output="$(printf '%s' "$shortcut_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
 [[ "$shortcut_output" == *"codex-conductor-recommendation"* ]] || {
