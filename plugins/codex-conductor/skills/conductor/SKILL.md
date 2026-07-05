@@ -1,20 +1,19 @@
 ---
 name: conductor
-description: "Use when the user wants Codex to coordinate visible subagents or Codex App threads, switch or target projects, dispatch worker sessions, collect execution results, or use the codex-conductor CLI."
+description: "Use when the user wants Codex to coordinate Codex App sessions/threads, switch or target projects, dispatch worker sessions, collect execution results, or use the codex-conductor CLI."
 ---
 
 # Codex Conductor
 
 Coordinate Codex work from the current App thread. This skill pairs with the
 `codex-conductor` CLI, but App-side orchestration should stay implementation
-neutral: use whatever visible subagent or thread capabilities the current Codex
-environment exposes.
+neutral while preferring native Codex App session/thread capabilities.
 
 ## Intent
 
 Use this skill when the user asks to:
 
-- split a task across visible subagents, worker Codex threads, or both
+- split a task across worker Codex sessions/threads
 - keep the current thread as the coordinator
 - work inside a specific Codex project
 - inspect, message, fork, pin, archive, or collect from related execution units
@@ -29,9 +28,9 @@ Use the focused companion skills when the intent is narrower:
 
 ## Core Rule
 
-Do not introduce MCP for V1 orchestration. Prefer visible orchestration
-capabilities already available in the session. For durable App-side thread
-coordination, use native Codex App thread tools:
+Do not introduce MCP for V1 orchestration. Prefer visible session orchestration
+capabilities already available in the App. For durable App-side coordination,
+use native Codex App thread tools:
 
 - `list_projects`
 - `create_thread`
@@ -45,17 +44,19 @@ coordination, use native Codex App thread tools:
 - `handoff_thread`
 
 Use the CLI for terminal-side project registry and prompt generation. Keep
-Conductor's protocol independent of any specific subagent implementation.
+Conductor's protocol centered on session units rather than backend-specific
+worker implementations.
 
 ## Execution Unit Selection
 
-- Default to Codex App thread units when the user asks for a project session,
-  worker session, thread, durable worker, code changes in a project, or
-  project-scoped execution. Do not route those requests through a subagent first.
-- Use visible subagents for short-lived sidecar work, parallel exploration, or
-  execution in environments where thread creation is not available or not
-  useful.
-- A subagent should create child project sessions only when its prompt
+- Use Codex App session/thread units when the user asks for a project session,
+  worker session, thread, durable worker, code changes in a project,
+  project-scoped execution, parallel investigation, implementation, or
+  verification.
+- If thread/session tools are unavailable, do not create non-session worker
+  substitutes. Keep the work in the coordinator, use the CLI to generate a
+  dispatch prompt, or ask for a supported session path.
+- A worker session should create child project sessions only when its prompt
   explicitly assigns it a shard-leader role, gives it a fan-out budget, and the
   current environment exposes thread tools. Otherwise, it should finish its own
   assigned work and report back to the coordinator.
@@ -71,9 +72,9 @@ It also treats shortcut-style prompts such as `CCC ...`, `/ccc ...`,
 When that happens:
 
 - If the user explicitly asked to split, dispatch, fork, coordinate, or run
-  visible subagents or worker threads, use this skill directly.
+  worker sessions/threads, use this skill directly.
 - If the prompt only loosely resembles orchestration, ask one short question:
-  "这个要用 Codex Conductor 拆成可见 worker 跑吗？"
+  "这个要用 Codex Conductor 拆成 worker session 跑吗？"
 - If the task is tiny, single-threaded, or the user said not to use Conductor,
   ignore the recommendation and continue normally.
 
@@ -83,13 +84,12 @@ When that happens:
 2. If the target project is unclear, call `list_projects` and choose the closest
    project from the user's wording. Ask only if there is real ambiguity.
 3. Before creating or messaging execution units, show a concise `Dispatch Plan`
-   in the coordinator thread. The plan should list each visible unit, its kind
-   (`subagent`, `thread`, or `collector`), target project or cwd, exact
-   deliverable, expected evidence, whether it may make changes, and any fan-out
-   budget.
+   in the coordinator thread. The plan should list each session unit, its kind
+   (`session` or `collector`), target project or cwd, exact deliverable,
+   expected evidence, whether it may make changes, and any fan-out budget.
 4. Decide whether each unit should be:
-   - a worker thread for durable, project-scoped execution
-   - a visible subagent for short-lived sidecar work or exploration
+   - a worker session/thread for durable, project-scoped execution
+   - a collector session when result collection itself should be visible
    - a shard leader only when it is explicitly allowed to create child sessions
    - an existing worker that should receive a follow-up message
 5. For Codex App thread units, decide whether to use:
@@ -102,14 +102,14 @@ When that happens:
    - exact deliverable
    - verification expected
    - instruction to report concise evidence back
-7. Treat visible subagents and worker threads as the execution evidence. Do not
-   hide meaningful work behind a single coordinator message.
+7. Treat worker sessions/threads as the execution evidence. Do not hide
+   meaningful work behind a single coordinator message.
 8. Allow nested dispatch only when the child unit first shows its own
    `Dispatch Plan`, stays within its fan-out budget, and reports child evidence
    back to the coordinator.
 9. Set readable titles with `set_thread_title` when using thread units.
-10. Use `read_thread` or the available subagent collection mechanism to collect
-   results. Include outputs only when evidence is necessary.
+10. Use `read_thread` to collect results. Include outputs only when evidence is
+   necessary.
 11. Optionally create a collector unit when result collection itself is large
    enough to be worth making visible. The collector summarizes evidence; the
    coordinator still owns the final synthesis and decision.
@@ -122,7 +122,7 @@ When that happens:
 You are a Codex Conductor visible worker.
 
 Role: <role>
-Kind: <subagent | thread | collector>
+Kind: <session | collector>
 Project: <project name or path>
 Coordinator thread: <thread id or title if available>
 Visibility: Your work is user-visible execution evidence for this dispatch.

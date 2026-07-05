@@ -1,7 +1,7 @@
 {
   "name": "codex-conductor",
   "version": "0.1.7",
-  "description": "Coordinate Codex projects, visible agents, and worker sessions with a small CLI and companion skills.",
+  "description": "Coordinate Codex projects and worker sessions with a small CLI and companion skills.",
   "author": {
     "name": "Codex Conductor contributors"
   },
@@ -19,8 +19,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Conductor",
-    "shortDescription": "Coordinate Codex projects and visible workers.",
-    "longDescription": "Codex Conductor bundles a local CLI, focused Codex skills, and a UserPromptSubmit hook for project-scoped visible-agent and thread orchestration, worker dispatch, status collection, and result synthesis inside Codex App sessions.",
+    "shortDescription": "Coordinate Codex projects and worker sessions.",
+    "longDescription": "Codex Conductor bundles a local CLI, focused Codex skills, and a UserPromptSubmit hook for project-scoped session/thread orchestration, worker-session dispatch, status collection, and result synthesis inside Codex App sessions.",
     "developerName": "Codex Conductor contributors",
     "category": "Developer Tools",
     "capabilities": [
@@ -33,7 +33,7 @@
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png",
     "defaultPrompt": [
-      "Use Codex Conductor to split this task into visible workers.",
+      "Use Codex Conductor to split this task into worker sessions.",
       "Show the active project and collect child results.",
       "Create a project-scoped dispatch plan for this goal."
     ]

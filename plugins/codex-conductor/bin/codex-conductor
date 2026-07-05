@@ -184,25 +184,25 @@ Goal:
 $*
 
 Act as the coordinator thread. Before creating or messaging execution units,
-show a concise Dispatch Plan that lists each visible unit, kind (subagent,
-thread, or collector), target project or cwd, deliverable, expected evidence,
-whether changes are allowed, and fan-out budget.
+show a concise Dispatch Plan that lists each session unit, kind (session or
+collector), target project or cwd, deliverable, expected evidence, whether
+changes are allowed, and fan-out budget.
 
-Prefer Codex App thread units for project sessions, worker sessions, durable
-workers, project-scoped code changes, or any task where a separate session is
-expected. Do not send those through a subagent first.
+Use Codex App session/thread units for project sessions, worker sessions,
+durable workers, project-scoped code changes, parallel investigation, or any
+task where a separate execution context is expected.
 
-Dispatch visible subagents only for short-lived sidecar work, parallel
-exploration, or when thread creation is not available or not useful. Treat all
-units as user-visible execution evidence, set clear titles where supported, and
-do not create a separate session-operator just to call thread APIs.
+Treat session units as user-visible execution evidence, set clear titles where
+supported, and do not create a separate session-operator just to call thread
+APIs. If session/thread tools are unavailable, keep the work in this
+coordinator or ask for a supported session path.
 
 Allow nested dispatch only when a child unit first shows its own Dispatch Plan,
 stays within its fan-out budget, and reports child evidence back to you.
 
 Optionally dispatch a collector unit when result collection is substantial.
-Collect child results with read_thread or the available subagent collection
-mechanism, then synthesize the final answer in this coordinator thread.
+Collect child results with read_thread, then synthesize the final answer in this
+coordinator thread.
 EOF
 }
 

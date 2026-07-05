@@ -1,6 +1,6 @@
 ---
 name: conductor-dispatch
-description: "Use when splitting a Codex task into visible subagents, worker threads, or parallel investigation, implementation, and verification roles."
+description: "Use when splitting a Codex task into worker sessions/threads or parallel investigation, implementation, and verification roles."
 ---
 
 # Conductor Dispatch
@@ -17,20 +17,19 @@ coordinator and distribute work across visible execution units.
 - Prefer narrow ownership slices over broad duplicate prompts.
 - Give each unit a kind, project or cwd, concrete deliverable, expected
   evidence, and fan-out budget.
-- Prefer Codex App thread units for project sessions, worker sessions, durable
-  workers, project-scoped code changes, or any task where the user expects a
-  separate session. Do not send those through a subagent first.
-- Use visible subagents for short-lived sidecar work, parallel exploration, or
-  when thread creation is not available or not useful.
-- Treat visible subagents and worker threads as user-visible execution units for
-  the dispatch.
+- Use Codex App session/thread units for project sessions, worker sessions,
+  durable workers, project-scoped code changes, parallel investigation, or any
+  task where the user expects a separate execution context.
+- If thread/session tools are unavailable, keep the work in the coordinator,
+  generate a dispatch prompt with the CLI, or ask for a supported session path.
+- Treat worker sessions/threads as user-visible execution units for the
+  dispatch.
 - Do not create a separate session-operator just to perform thread API calls.
   Dispatch meaningful work units instead.
 - Use `fork_thread` only when a thread unit needs completed coordinator
   context.
 - Use `create_thread` for independent project-scoped thread units.
-- Use `read_thread` or the available subagent collection mechanism before
-  summarizing results.
+- Use `read_thread` before summarizing results.
 - Allow nested dispatch only when the child unit first shows its own
   `Dispatch Plan`, stays within its fan-out budget, and reports child evidence
   back to the coordinator.
@@ -40,7 +39,7 @@ coordinator and distribute work across visible execution units.
 ```text
 Dispatch Plan:
 - unit: <readable unit title>
-  kind: <subagent | thread | collector>
+  kind: <session | collector>
   target: <project name or cwd>
   deliverable: <specific output>
   evidence: <files, commands, screenshots, or thread evidence expected>
@@ -54,7 +53,7 @@ Dispatch Plan:
 You are a Codex Conductor visible worker.
 
 Role: <role>
-Kind: <subagent | thread | collector>
+Kind: <session | collector>
 Project: <project name or absolute path>
 Coordinator: <thread title or id if available>
 Visibility: Your work is user-visible execution evidence for this dispatch.

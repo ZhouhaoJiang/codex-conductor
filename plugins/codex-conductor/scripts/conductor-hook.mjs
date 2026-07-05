@@ -18,7 +18,6 @@ const SHORTCUT_PATTERNS = [
 
 const STRONG_PATTERNS = [
 	/\bworker(?:s)?\b/i,
-	/\bsubagent(?:s)?\b/i,
 	/\bfork\b/i,
 	/\bdispatch\b/i,
 	/\borchestrat(?:e|ion)\b/i,
@@ -133,14 +132,14 @@ dispatch/session coordination and use the ulw-loop skill's evidence-bound
 execution discipline. For tiny read-only questions, keep it lightweight.
 
 When Conductor is accepted, keep the current thread as the coordinator, use
-visible execution units exposed by this Codex environment, and show a concise
-Dispatch Plan before creating or messaging execution units.
+Codex App session/thread units exposed by this environment, and show a concise
+Dispatch Plan before creating or messaging session units.
 
-Default to Codex App thread units for project sessions, worker sessions, durable
-workers, project-scoped code changes, or any prompt where a separate session is
-expected. Do not dispatch a subagent just to create a project session; use
-visible subagents for short-lived sidecar exploration or when thread creation
-is not available or not useful.`;
+Default to Codex App session/thread units for project sessions, worker
+sessions, durable workers, project-scoped code changes, parallel investigation,
+or any prompt where a separate execution context is expected. If session/thread
+tools are unavailable, keep the work in the coordinator or ask for a supported
+session path rather than creating non-session workers.`;
 }
 
 function formatAdditionalContext(additionalContext) {

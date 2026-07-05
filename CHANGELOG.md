@@ -4,8 +4,8 @@ All notable changes to Codex Conductor will be documented in this file.
 
 ## Unreleased
 
-- Clarified Conductor dispatch selection so project/session work prefers Codex
-  App thread units directly instead of routing through subagents first.
+- Made Conductor dispatch session-first: project, durable, parallel, and
+  worker-shaped work now uses Codex App session/thread units directly.
 - Added Conductor + ULW pairing guidance to Conductor-triggered prompts,
   reducing the need to type `CCC ULW` manually without widening the hook trigger
   surface to generic delivery prompts.
@@ -16,7 +16,7 @@ All notable changes to Codex Conductor will be documented in this file.
 ## 0.1.7 - 2026-07-01
 
 - Generalized Conductor dispatch from thread-only workers to visible execution
-  units, including visible subagents, worker threads, and collector units.
+  units, including worker sessions/threads and collector units.
 - Added fan-out budget and nested dispatch rules to the Conductor skills,
   generated dispatch prompt, and hook recommendation.
 - Added smoke-test coverage for the visible dispatch protocol.

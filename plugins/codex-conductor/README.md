@@ -7,14 +7,13 @@
 Codex Conductor is a local Codex plugin that pairs:
 
 - a small CLI for project-scoped Codex workflows
-- focused Codex skills for App-side thread orchestration
+- focused Codex skills for App-side session orchestration
 - a prompt hook that suggests Conductor when a prompt looks like
-  multi-agent, multi-thread, worker, project, or session orchestration work
+  multi-session, multi-thread, worker, project, or session orchestration work
 
 The CLI keeps human terminal workflows fast. The skill lets any Codex App
-session act as a coordinator that can dispatch visible subagents, create or
-message worker threads through Codex App's native thread tools, and summarize
-child results.
+session act as a coordinator that can create or message worker sessions through
+Codex App's native thread tools and summarize child results.
 
 This is an experimental `0.1.x` plugin. The CLI and install flow are usable,
 but Codex plugin manifest and hook APIs may still change.
@@ -36,14 +35,14 @@ The current Codex thread stays responsible for coordination. Before creating or
 messaging execution units, it should show a concise `Dispatch Plan` that names
 each unit, kind, target, deliverable, expected evidence, and fan-out budget.
 
-Visible subagents and worker threads are the execution units. Conductor does not
-add a hidden session-operator just to call thread APIs. A collector can be a
-visible unit when synthesis is large enough to show separately, while the
-coordinator still owns the final answer.
+Worker sessions/threads are the execution units. Conductor does not add a
+hidden session-operator just to call thread APIs. A collector can be a visible
+session when synthesis is large enough to show separately, while the coordinator
+still owns the final answer.
 
-For project-scoped, durable, or separate-session work, prefer Codex App thread
-units directly. Visible subagents are for short-lived sidecar work or
-exploration, not an extra hop before opening a project session.
+For project-scoped, durable, parallel, or separate-session work, use Codex App
+session/thread units directly. If native session tools are unavailable, keep the
+work in the coordinator or ask for a supported session path.
 
 ## Install
 
@@ -103,7 +102,7 @@ Set `CODEX_CONDUCTOR_HOME` to keep state somewhere other than
 After installing the plugin, start a new Codex thread and say:
 
 ```text
-Use Codex Conductor to split this task into visible workers.
+Use Codex Conductor to split this task into worker sessions.
 ```
 
 The companion skill tells Codex how to use the built-in App thread tools rather

@@ -8,6 +8,16 @@ PROJECT_DIR="$(mktemp -d)"
 trap 'rm -rf "$STATE_HOME" "$PROJECT_DIR"' EXIT
 
 export CODEX_CONDUCTOR_HOME="$STATE_HOME"
+forbidden_worker_term="sub""agent"
+
+assert_no_forbidden_worker_term() {
+  local value_lower
+  value_lower="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  [[ "$value_lower" != *"$forbidden_worker_term"* ]] || {
+    printf '%s\n' "$2" >&2
+    exit 1
+  }
+}
 
 PLUGIN_DIR="$PLUGIN_DIR" node <<'NODE'
 const { existsSync, readFileSync } = require("node:fs");
@@ -95,8 +105,8 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt did not mention the visible dispatch plan\n' >&2
   exit 1
 }
-[[ "$dispatch" == *"visible subagents"* ]] || {
-  printf 'dispatch prompt did not mention visible subagents\n' >&2
+[[ "$dispatch" == *"session unit"* ]] || {
+  printf 'dispatch prompt did not make sessions the dispatch unit\n' >&2
   exit 1
 }
 [[ "$dispatch" == *"user-visible execution evidence"* ]] || {
@@ -107,14 +117,12 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt did not mention fan-out budget\n' >&2
   exit 1
 }
-[[ "$dispatch" == *"Prefer Codex App thread units for project sessions"* ]] || {
-  printf 'dispatch prompt did not prefer project session threads\n' >&2
+[[ "$dispatch" == *"Use Codex App session/thread units"* ]] || {
+  printf 'dispatch prompt did not require session/thread units\n' >&2
   exit 1
 }
-[[ "$dispatch" == *"Do not send those through a subagent first"* ]] || {
-  printf 'dispatch prompt did not prevent subagent-first project sessions\n' >&2
-  exit 1
-}
+assert_no_forbidden_worker_term "$dispatch" \
+  "dispatch prompt used the forbidden non-session worker term"
 [[ "$dispatch" == *"session-operator"* ]] || {
   printf 'dispatch prompt did not reject session-operator dispatch\n' >&2
   exit 1
@@ -130,10 +138,12 @@ hook_output="$(printf '%s' "$hook_payload" | node "$PLUGIN_DIR/scripts/conductor
   printf 'hook recommendation did not mention the visible dispatch plan\n' >&2
   exit 1
 }
-[[ "$hook_output" == *"visible subagent"* ]] || {
-  printf 'hook recommendation did not mention visible subagents\n' >&2
+[[ "$hook_output" == *"Codex App session/thread units"* ]] || {
+  printf 'hook recommendation did not make sessions the dispatch unit\n' >&2
   exit 1
 }
+assert_no_forbidden_worker_term "$hook_output" \
+  "hook recommendation used the forbidden non-session worker term"
 [[ "$hook_output" == *"ulw-loop"* ]] || {
   printf 'hook recommendation did not mention ulw-loop pairing\n' >&2
   exit 1
@@ -159,14 +169,12 @@ ccc_workflow_output="$(printf '%s' "$ccc_workflow_payload" | node "$PLUGIN_DIR/s
 
 ccc_project_session_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 给 hr-ai 起一个 project session 修这个问题"}'
 ccc_project_session_output="$(printf '%s' "$ccc_project_session_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
-[[ "$ccc_project_session_output" == *"Default to Codex App thread units for project sessions"* ]] || {
-  printf 'hook recommendation did not default project sessions to thread units\n' >&2
+[[ "$ccc_project_session_output" == *"Default to Codex App session/thread units for project sessions"* ]] || {
+  printf 'hook recommendation did not default project sessions to session/thread units\n' >&2
   exit 1
 }
-[[ "$ccc_project_session_output" == *"Do not dispatch a subagent just to create a project session"* ]] || {
-  printf 'hook recommendation did not prevent subagent-first project sessions\n' >&2
-  exit 1
-}
+assert_no_forbidden_worker_term "$ccc_project_session_output" \
+  "project-session recommendation used the forbidden non-session worker term"
 
 shortcut_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 帮我拆成 worker 跑"}'
 shortcut_output="$(printf '%s' "$shortcut_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
