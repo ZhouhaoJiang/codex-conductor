@@ -43,6 +43,7 @@ const WEAK_PATTERNS = [
 ];
 
 const SUPPRESS_PATTERNS = [
+	/^\s*(?:\/?ccc|\/?codex[-_\s]+conductor|\/?codex[-_\s]+con|\/?conductor)\s+lite(?:\s|:|：|$)/i,
 	/不要.*conductor/i,
 	/不用.*conductor/i,
 	/不要.*调度/,
@@ -127,9 +128,10 @@ Codex Conductor. If useful, ask the user for confirmation in one short sentence
 or proceed when they explicitly asked for multi-thread/session dispatch.
 
 When the accepted work is implementation, commit, plugin, project-session, or
-other delivery-shaped work, pair Conductor with ULW: use the conductor skill for
-dispatch/session coordination and use the ulw-loop skill's evidence-bound
-execution discipline. For tiny read-only questions, keep it lightweight.
+other delivery-shaped work, pair Conductor with the bundled conductor-lite skill:
+use the conductor skill for dispatch/session coordination and conductor-lite for
+direct execution with one focused verification pass. For tiny read-only
+questions, keep it lightweight.
 
 When Conductor is accepted, keep the current thread as the coordinator, use
 Codex App session/thread units exposed by this environment, and show a concise

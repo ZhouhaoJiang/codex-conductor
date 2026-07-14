@@ -22,15 +22,17 @@ Use this skill when the user asks to:
 
 Use the focused companion skills when the intent is narrower:
 
+- `conductor-lite` for direct delivery inside the current session without
+  orchestration overhead
 - `conductor-dispatch` for creating or assigning visible execution units
 - `conductor-projects` for CLI project registry and project targeting
 - `conductor-collector` for collecting and synthesizing execution results
 
 ## Core Rule
 
-Do not introduce MCP for V1 orchestration. Prefer visible session orchestration
-capabilities already available in the App. For durable App-side coordination,
-use native Codex App thread tools:
+Do not use MCP as the transport for session orchestration. The plugin's MCPs
+form a separate code-intelligence capability layer. For durable App-side
+coordination, use native Codex App thread tools:
 
 - `list_projects`
 - `create_thread`
@@ -102,6 +104,8 @@ When that happens:
    - exact deliverable
    - verification expected
    - instruction to report concise evidence back
+   - the bundled `conductor-lite` discipline for delivery work unless the role
+     needs a stricter explicitly named profile
 7. Treat worker sessions/threads as the execution evidence. Do not hide
    meaningful work behind a single coordinator message.
 8. Allow nested dispatch only when the child unit first shows its own

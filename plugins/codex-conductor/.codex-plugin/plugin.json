@@ -1,11 +1,11 @@
 {
   "name": "codex-conductor",
-  "version": "0.1.7",
-  "description": "Coordinate Codex projects and worker sessions with a small CLI and companion skills.",
+  "version": "0.2.1",
+  "description": "Coordinate Codex projects and sessions with lightweight execution, curated MCPs, skills, and non-blocking hooks.",
   "author": {
     "name": "Codex Conductor contributors"
   },
-  "license": "MIT",
+  "license": "MIT AND LicenseRef-Sustainable-Use-1.0",
   "keywords": [
     "codex",
     "orchestration",
@@ -14,17 +14,22 @@
     "cli"
   ],
   "hooks": [
-    "./hooks/user-prompt-submit-recommending-conductor.json"
+    "./hooks/user-prompt-submit-recommending-conductor.json",
+    "./hooks/project-rules.json",
+    "./hooks/git-bash.json"
   ],
+  "mcpServers": "./.mcp.json",
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Conductor",
-    "shortDescription": "Coordinate Codex projects and worker sessions.",
-    "longDescription": "Codex Conductor bundles a local CLI, focused Codex skills, and a UserPromptSubmit hook for project-scoped session/thread orchestration, worker-session dispatch, status collection, and result synthesis inside Codex App sessions.",
+    "shortDescription": "Session orchestration plus a lightweight engineering capability pack.",
+    "longDescription": "Codex Conductor bundles visible project/session orchestration, a direct Conductor Lite lane with proportional engineering-quality defaults, curated code-intelligence MCPs, focused engineering skills, and non-blocking project-context hooks.",
     "developerName": "Codex Conductor contributors",
     "category": "Developer Tools",
     "capabilities": [
       "Hooks",
+      "MCP Tools",
+      "Code Intelligence",
       "Workflow",
       "Context Injection",
       "CLI"
@@ -34,6 +39,7 @@
     "logo": "./assets/logo.png",
     "defaultPrompt": [
       "Use Codex Conductor to split this task into worker sessions.",
+      "Use Conductor Lite to finish this change directly, apply proportional engineering quality, and run one focused verification pass.",
       "Show the active project and collect child results.",
       "Create a project-scoped dispatch plan for this goal."
     ]

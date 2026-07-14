@@ -17,6 +17,8 @@ coordinator and distribute work across visible execution units.
 - Prefer narrow ownership slices over broad duplicate prompts.
 - Give each unit a kind, project or cwd, concrete deliverable, expected
   evidence, and fan-out budget.
+- For delivery units, use the bundled `conductor-lite` discipline so execution
+  stays direct and verification stays focused.
 - Use Codex App session/thread units for project sessions, worker sessions,
   durable workers, project-scoped code changes, parallel investigation, or any
   task where the user expects a separate execution context.

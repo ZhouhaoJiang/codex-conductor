@@ -4,11 +4,38 @@ All notable changes to Codex Conductor will be documented in this file.
 
 ## Unreleased
 
+## 0.2.1 - 2026-07-14
+
+- Added proportional engineering-quality defaults to `conductor-lite`: scale
+  design and plan artifacts to the work, choose coding standards before
+  implementation, put unit tests in real repository test files, and keep
+  functional acceptance distinct from lower-level checks.
+- Defined design/plan, code, test, and functional review lenses without turning
+  them into automatic multi-reviewer or multi-session gates.
+- Tightened the focused debugging, refactor, and frontend skills around real
+  regression-test files and user-path acceptance.
+- Added a durable design decision and implementation plan for the quality model.
+
+## 0.2.0 - 2026-07-14
+
 - Made Conductor dispatch session-first: project, durable, parallel, and
   worker-shaped work now uses Codex App session/thread units directly.
-- Added Conductor + ULW pairing guidance to Conductor-triggered prompts,
-  reducing the need to type `CCC ULW` manually without widening the hook trigger
-  surface to generic delivery prompts.
+- Integrated the explicit `conductor-lite` execution lane: direct work by
+  default, brief planning only around real decisions or risk, no duplicate
+  workflow state, and one focused verification pass.
+- Replaced the external execution-loop pairing in generated dispatch prompts
+  and hook guidance with the bundled lightweight lane.
+- Added grep.app, Context7, LSP, Windows Git Bash, and optional CodeGraph MCPs.
+- Added non-blocking project-rule and Git Bash reminder hooks while excluding
+  automatic updates, telemetry, background provisioning, post-edit blockers,
+  stop continuation, and forced execution loops.
+- Added selected and adapted engineering skills for AST search, coding-session
+  discovery, debugging, frontend work, Git, LSP, strict opt-in programming,
+  refactoring, cleanup, browsing escalation, project rules, and visual QA.
+- Added explicit third-party attribution and per-directory licenses for the
+  MIT and Sustainable Use components selected from OMO 4.17.1.
+- Added an explicit `--with-codegraph` installer option; session hooks never
+  download the large optional runtime.
 - Changed plugin icon metadata to use packaged asset paths instead of inline
   data URIs so Codex App can resolve the Conductor logo like other local
   plugins.

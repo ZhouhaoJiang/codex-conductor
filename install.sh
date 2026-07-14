@@ -9,6 +9,7 @@ CLI_SOURCE="$PLUGIN_ROOT/bin/codex-conductor"
 CLI_DIR="${CODEX_CONDUCTOR_CLI_DIR:-$HOME/.local/bin}"
 CODEX_BIN_RESOLVED=""
 INSTALL_CLI=1
+INSTALL_CODEGRAPH=0
 DRY_RUN=0
 
 usage() {
@@ -16,11 +17,13 @@ usage() {
 Install Codex Conductor.
 
 Usage:
-  ./install.sh [--dry-run] [--no-cli] [--cli-dir <dir>]
+  ./install.sh [--dry-run] [--no-cli] [--with-codegraph] [--cli-dir <dir>]
 
 Environment:
   CODEX_BIN                  Codex CLI binary to use. Auto-detected by default.
   CODEX_CONDUCTOR_CLI_DIR  CLI symlink directory. Defaults to ~/.local/bin.
+  CODEX_CONDUCTOR_RUNTIME_HOME  Optional runtime directory. Defaults to
+                              ~/.local/share/codex-conductor.
 USAGE
 }
 
@@ -101,6 +104,10 @@ while [[ "$#" -gt 0 ]]; do
       INSTALL_CLI=0
       shift
       ;;
+    --with-codegraph)
+      INSTALL_CODEGRAPH=1
+      shift
+      ;;
     --cli-dir)
       [[ "$#" -ge 2 ]] || die "--cli-dir requires a value"
       CLI_DIR="$2"
@@ -120,6 +127,8 @@ done
 [[ -f "$REPO_ROOT/.agents/plugins/marketplace.json" ]] || die "missing marketplace manifest"
 [[ -f "$PLUGIN_ROOT/.codex-plugin/plugin.json" ]] || die "missing plugin manifest"
 [[ -x "$CLI_SOURCE" ]] || die "CLI is not executable: $CLI_SOURCE"
+[[ -x "$PLUGIN_ROOT/scripts/install-codegraph-runtime" ]] ||
+  die "CodeGraph runtime installer is not executable"
 
 CODEX_BIN_RESOLVED="$(find_codex)" ||
   die "no Codex CLI with plugin install support was found; update Codex or set CODEX_BIN"
@@ -127,6 +136,10 @@ command -v node >/dev/null 2>&1 || die "node was not found in PATH; Conductor ho
 
 run "$CODEX_BIN_RESOLVED" plugin marketplace add "$REPO_ROOT"
 run "$CODEX_BIN_RESOLVED" plugin add "$PLUGIN_NAME@$MARKETPLACE_NAME"
+
+if [[ "$INSTALL_CODEGRAPH" -eq 1 ]]; then
+  run "$PLUGIN_ROOT/scripts/install-codegraph-runtime"
+fi
 
 if [[ "$INSTALL_CLI" -eq 1 ]]; then
   run mkdir -p "$CLI_DIR"
@@ -151,9 +164,13 @@ else
 Codex Conductor installed.
 
 Next steps:
-  1. Start a new Codex thread so plugin skills and hooks are loaded.
+  1. Start a new Codex task so plugin skills and hooks are loaded.
   2. Try: "Use Codex Conductor to split this task into worker sessions."
-  3. CLI: codex-conductor help
+  3. Try: "Conductor Lite: finish this directly."
+  4. CLI: codex-conductor help
+
+CodeGraph is optional. Re-run ./install.sh --with-codegraph to install its
+pinned local runtime; no session hook downloads it in the background.
 
 EOF
 fi

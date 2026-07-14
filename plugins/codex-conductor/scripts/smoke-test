@@ -32,6 +32,59 @@ const hookPaths = Array.isArray(manifest.hooks)
   : typeof manifest.hooks === "string"
     ? [manifest.hooks]
     : [];
+const expectedSkills = [
+  "ast-grep",
+  "coding-agent-sessions",
+  "conductor-lite",
+  "debugging",
+  "frontend",
+  "git-master",
+  "lsp",
+  "lsp-setup",
+  "programming-strict",
+  "refactor",
+  "remove-ai-slops",
+  "rules",
+  "ultimate-browsing",
+  "visual-qa",
+];
+const excludedGovernanceSkills = [
+  "comment-checker",
+  "init-deep",
+  "review-work",
+  "start-work",
+  "teammode",
+  "ultrawork",
+  "ulw-loop",
+  "ulw-plan",
+  "ulw-research",
+];
+const sustainableUsePaths = [
+  ["skills", "ast-grep"],
+  ["skills", "coding-agent-sessions"],
+  ["skills", "lsp-setup"],
+  ["skills", "programming-strict"],
+  ["skills", "ultimate-browsing"],
+  ["runtime", "git-bash-hook"],
+  ["runtime", "git-bash-mcp"],
+];
+const forbiddenGovernanceTerms = [
+  "auto-update",
+  "bootstrap",
+  "comment-checker",
+  "lazycodex-executor",
+  "start-work",
+  "telemetry",
+  "ultrawork",
+  "ulw-loop",
+];
+const forbiddenSkillGovernanceTerms = [
+  "comment-checker",
+  "lazycodex-executor",
+  "start-work",
+  "ultrawork",
+  "ulw-loop",
+];
 
 for (const field of iconFields) {
   const value = manifest.interface?.[field];
@@ -45,10 +98,118 @@ for (const field of iconFields) {
   }
 }
 
+for (const skillName of expectedSkills) {
+  const skillPath = join(pluginDir, "skills", skillName, "SKILL.md");
+  if (!existsSync(skillPath)) {
+    throw new Error(`plugin must package the curated ${skillName} skill`);
+  }
+
+  const skill = readFileSync(skillPath, "utf8");
+  const frontmatter = skill.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+  if (/MUST USE/i.test(frontmatter)) {
+    throw new Error(`${skillName} must not auto-activate through MUST USE governance`);
+  }
+  if (forbiddenSkillGovernanceTerms.some((term) => skill.toLowerCase().includes(term))) {
+    throw new Error(`${skillName} still depends on excluded OMO governance`);
+  }
+}
+
+for (const skillName of excludedGovernanceSkills) {
+  if (existsSync(join(pluginDir, "skills", skillName))) {
+    throw new Error(`excluded governance skill was packaged: ${skillName}`);
+  }
+}
+
+const liteSkillPath = join(pluginDir, "skills", "conductor-lite", "SKILL.md");
+const liteSkill = readFileSync(liteSkillPath, "utf8");
+if (!liteSkill.includes("one focused verification pass")) {
+  throw new Error("conductor-lite must require one focused verification pass");
+}
+if (!liteSkill.includes("Do not create duplicate goals, ledgers, evidence files, or checkpoints")) {
+  throw new Error("conductor-lite must reject duplicate workflow state");
+}
+if (!liteSkill.includes("[engineering quality defaults](references/engineering-quality.md)")) {
+  throw new Error("conductor-lite must load engineering quality defaults for substantive code changes");
+}
+
+const qualityReferencePath = join(
+  pluginDir,
+  "skills",
+  "conductor-lite",
+  "references",
+  "engineering-quality.md",
+);
+if (!existsSync(qualityReferencePath)) {
+  throw new Error("conductor-lite must package its engineering quality reference");
+}
+const qualityReference = readFileSync(qualityReferencePath, "utf8");
+for (const requiredPrinciple of [
+  "default judgment, not a universal law or a new approval gate",
+  "user and repository rules",
+  "mature, widely adopted language guide",
+  "Google",
+  "actual test file",
+  "Functional acceptance",
+  "Review lenses",
+  "quality begins during implementation",
+  "same reviewer",
+]) {
+  if (!qualityReference.includes(requiredPrinciple)) {
+    throw new Error(`engineering quality reference is missing: ${requiredPrinciple}`);
+  }
+}
+
+const debuggingSkill = readFileSync(join(pluginDir, "skills", "debugging", "SKILL.md"), "utf8");
+if (!debuggingSkill.includes("actual test file")) {
+  throw new Error("debugging must distinguish a regression unit test from an ad hoc reproducer");
+}
+const refactorSkill = readFileSync(join(pluginDir, "skills", "refactor", "SKILL.md"), "utf8");
+if (!refactorSkill.includes("actual test file")) {
+  throw new Error("refactor must keep characterization tests in the repository test suite");
+}
+const frontendSkill = readFileSync(join(pluginDir, "skills", "frontend", "SKILL.md"), "utf8");
+if (!/Passing a build or unit tests is not\s+functional acceptance/.test(frontendSkill)) {
+  throw new Error("frontend must keep functional acceptance distinct from build and unit tests");
+}
+
+const strictSkill = readFileSync(join(pluginDir, "skills", "programming-strict", "SKILL.md"), "utf8");
+if (!strictSkill.includes("Only activate this skill when the user explicitly asks")) {
+  throw new Error("programming-strict must remain explicit opt-in");
+}
+
+const conductorSkill = readFileSync(join(pluginDir, "skills", "conductor", "SKILL.md"), "utf8");
+if (!conductorSkill.includes("`conductor-lite` discipline")) {
+  throw new Error("conductor dispatch must pair delivery units with conductor-lite");
+}
+
+if (!manifest.license?.includes("LicenseRef-Sustainable-Use-1.0")) {
+  throw new Error("plugin manifest must disclose the selected Sustainable Use components");
+}
+if (!existsSync(join(pluginDir, "THIRD_PARTY_NOTICES.md"))) {
+  throw new Error("plugin must package third-party attribution");
+}
+for (const pathParts of sustainableUsePaths) {
+  if (!existsSync(join(pluginDir, ...pathParts, "LICENSE.md"))) {
+    throw new Error(`missing Sustainable Use license: ${pathParts.join("/")}`);
+  }
+}
+for (const pathParts of [["runtime", "rules"], ["runtime", "lsp-daemon"]]) {
+  if (!existsSync(join(pluginDir, ...pathParts, "LICENSE"))) {
+    throw new Error(`missing MIT component license: ${pathParts.join("/")}`);
+  }
+}
+
+const defaultPrompts = manifest.interface?.defaultPrompt;
+if (!Array.isArray(defaultPrompts) || !defaultPrompts.some((prompt) => prompt.includes("Conductor Lite"))) {
+  throw new Error("plugin interface must expose a Conductor Lite starter prompt");
+}
+
 if (hookPaths.length === 0) {
   throw new Error("plugin manifest must declare hook manifest paths in .codex-plugin/plugin.json");
 }
 
+const registeredEvents = new Set();
+const registeredCommands = [];
 for (const hookPath of hookPaths) {
   const relativeHookPath = hookPath.replace(/^\.\//, "");
   const absoluteHookPath = join(pluginDir, relativeHookPath);
@@ -57,23 +218,114 @@ for (const hookPath of hookPaths) {
   }
 
   const hookManifest = JSON.parse(readFileSync(absoluteHookPath, "utf8"));
-  const userPromptHooks = hookManifest.hooks?.UserPromptSubmit;
-  if (!Array.isArray(userPromptHooks) || userPromptHooks.length === 0) {
-    throw new Error(`${hookPath} must register a UserPromptSubmit hook`);
-  }
+  for (const [eventName, entries] of Object.entries(hookManifest.hooks ?? {})) {
+    registeredEvents.add(eventName);
+    if (!Array.isArray(entries) || entries.length === 0) {
+      throw new Error(`${hookPath} registers an empty ${eventName} hook list`);
+    }
 
-  for (const entry of userPromptHooks) {
-    for (const hook of entry.hooks ?? []) {
-      if (hook.type !== "command" || typeof hook.command !== "string") continue;
-      const matches = hook.command.matchAll(/\$\{PLUGIN_ROOT\}\/([^"\s]+)/g);
-      for (const match of matches) {
-        const target = join(pluginDir, match[1]);
-        if (!existsSync(target)) {
-          throw new Error(`${hookPath} references missing command target: ${match[1]}`);
+    for (const entry of entries) {
+      for (const hook of entry.hooks ?? []) {
+        if (hook.type !== "command" || typeof hook.command !== "string") continue;
+        registeredCommands.push(hook.command);
+        const commandLower = hook.command.toLowerCase();
+        for (const term of forbiddenGovernanceTerms) {
+          if (commandLower.includes(term)) {
+            throw new Error(`${hookPath} registers excluded governance command: ${term}`);
+          }
+        }
+
+        const matches = hook.command.matchAll(/\$\{PLUGIN_ROOT\}\/([^"\s]+)/g);
+        for (const match of matches) {
+          const target = join(pluginDir, match[1]);
+          if (!existsSync(target)) {
+            throw new Error(`${hookPath} references missing command target: ${match[1]}`);
+          }
         }
       }
     }
   }
+}
+
+for (const command of registeredCommands) {
+  const allowed = [
+    "/scripts/conductor-hook.mjs",
+    "/scripts/rules-hook.mjs",
+    "/runtime/git-bash-hook/dist/cli.js",
+  ];
+  if (!allowed.some((target) => command.includes(target))) {
+    throw new Error(`unexpected automatic hook command: ${command}`);
+  }
+}
+
+for (const eventName of ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PostCompact"]) {
+  if (!registeredEvents.has(eventName)) {
+    throw new Error(`curated hook set must register ${eventName}`);
+  }
+}
+for (const eventName of ["Stop", "SubagentStop"]) {
+  if (registeredEvents.has(eventName)) {
+    throw new Error(`curated hook set must not register blocking ${eventName} hooks`);
+  }
+}
+
+if (existsSync(join(pluginDir, "runtime", "rules", "bundled-rules"))) {
+  throw new Error("Conductor must not package OMO model-governance bundled rules");
+}
+
+if (typeof manifest.mcpServers !== "string") {
+  throw new Error("plugin manifest must declare a packaged MCP manifest");
+}
+const mcpPath = join(pluginDir, manifest.mcpServers.replace(/^\.\//, ""));
+if (!existsSync(mcpPath)) {
+  throw new Error(`plugin MCP manifest is missing: ${manifest.mcpServers}`);
+}
+const mcpManifest = JSON.parse(readFileSync(mcpPath, "utf8"));
+const servers = mcpManifest.mcpServers ?? {};
+const serverNames = Object.keys(servers).sort();
+const expectedServerNames = ["codegraph", "context7", "git_bash", "grep_app", "lsp"];
+if (JSON.stringify(serverNames) !== JSON.stringify(expectedServerNames)) {
+  throw new Error(`unexpected MCP server set: ${serverNames.join(", ")}`);
+}
+if (servers.grep_app?.url !== "https://mcp.grep.app") {
+  throw new Error("grep_app must use the official remote MCP endpoint");
+}
+if (servers.context7?.url !== "https://mcp.context7.com/mcp") {
+  throw new Error("context7 must use the official remote MCP endpoint");
+}
+if (servers.codegraph?.required !== false) {
+  throw new Error("CodeGraph must remain optional");
+}
+if (servers.git_bash?.required !== false) {
+  throw new Error("Windows-only Git Bash MCP must remain optional on other platforms");
+}
+
+for (const name of ["codegraph", "git_bash", "lsp"]) {
+  const server = servers[name];
+  if (server?.command !== "node" || !Array.isArray(server.args) || server.args.length === 0) {
+    throw new Error(`${name} must use a packaged Node entrypoint`);
+  }
+  const target = join(pluginDir, server.args[0]);
+  if (!existsSync(target)) {
+    throw new Error(`${name} references missing entrypoint: ${server.args[0]}`);
+  }
+}
+
+const codegraphWrapper = readFileSync(join(pluginDir, servers.codegraph.args[0]), "utf8");
+for (const requiredSetting of [
+  'CODEGRAPH_NO_DAEMON: "1"',
+  'CODEGRAPH_NO_DOWNLOAD: "1"',
+  'CODEGRAPH_TELEMETRY: "0"',
+  'DO_NOT_TRACK: "1"',
+]) {
+  if (!codegraphWrapper.includes(requiredSetting)) {
+    throw new Error(`CodeGraph wrapper is missing safe runtime setting: ${requiredSetting}`);
+  }
+}
+
+const rulesWrapper = readFileSync(join(pluginDir, "scripts", "rules-hook.mjs"), "utf8");
+if (!rulesWrapper.includes('CODEX_RULES_DISABLE_BUNDLED = "1"')) {
+  throw new Error("project-rules wrapper must disable OMO bundled model rules");
 }
 NODE
 
@@ -121,6 +373,14 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt did not require session/thread units\n' >&2
   exit 1
 }
+[[ "$dispatch" == *"conductor-lite"* ]] || {
+  printf 'dispatch prompt did not use the bundled conductor-lite discipline\n' >&2
+  exit 1
+}
+[[ "$(printf '%s' "$dispatch" | tr '[:upper:]' '[:lower:]')" != *"ulw"* ]] || {
+  printf 'dispatch prompt still depends on the external ULW workflow\n' >&2
+  exit 1
+}
 assert_no_forbidden_worker_term "$dispatch" \
   "dispatch prompt used the forbidden non-session worker term"
 [[ "$dispatch" == *"session-operator"* ]] || {
@@ -144,8 +404,12 @@ hook_output="$(printf '%s' "$hook_payload" | node "$PLUGIN_DIR/scripts/conductor
 }
 assert_no_forbidden_worker_term "$hook_output" \
   "hook recommendation used the forbidden non-session worker term"
-[[ "$hook_output" == *"ulw-loop"* ]] || {
-  printf 'hook recommendation did not mention ulw-loop pairing\n' >&2
+[[ "$hook_output" == *"conductor-lite"* ]] || {
+  printf 'hook recommendation did not mention conductor-lite pairing\n' >&2
+  exit 1
+}
+[[ "$(printf '%s' "$hook_output" | tr '[:upper:]' '[:lower:]')" != *"ulw"* ]] || {
+  printf 'hook recommendation still depends on the external ULW workflow\n' >&2
   exit 1
 }
 
@@ -162,8 +426,22 @@ ccc_workflow_output="$(printf '%s' "$ccc_workflow_payload" | node "$PLUGIN_DIR/s
   printf 'hook did not recommend conductor for CCC delivery prompt\n' >&2
   exit 1
 }
-[[ "$ccc_workflow_output" == *"pair Conductor with ULW"* ]] || {
-  printf 'hook did not recommend combined Conductor + ULW workflow for CCC delivery prompt\n' >&2
+[[ "$ccc_workflow_output" == *"pair Conductor with the bundled conductor-lite skill"* ]] || {
+  printf 'hook did not recommend bundled conductor-lite for CCC delivery prompt\n' >&2
+  exit 1
+}
+
+ccc_lite_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC Lite 修复这个问题"}'
+ccc_lite_output="$(printf '%s' "$ccc_lite_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ -z "$ccc_lite_output" ]] || {
+  printf 'hook routed CCC Lite into session orchestration\n' >&2
+  exit 1
+}
+
+conductor_lite_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"Conductor Lite：直接完成这个修改"}'
+conductor_lite_output="$(printf '%s' "$conductor_lite_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
+[[ -z "$conductor_lite_output" ]] || {
+  printf 'hook routed Conductor Lite into session orchestration\n' >&2
   exit 1
 }
 
