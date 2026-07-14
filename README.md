@@ -4,9 +4,10 @@
   <img src="plugins/codex-conductor/assets/icon.png" alt="Codex Conductor logo" width="96">
 </p>
 
-Codex Conductor is a small orchestration layer for Codex. It packages a CLI,
-a Codex skill, and a prompt hook as a local Codex plugin so one Codex thread
-can coordinate project-scoped worker sessions.
+Codex Conductor is a lightweight project/session orchestration layer plus a
+curated developer capability pack for Codex. It keeps the useful tools and
+knowledge from OMO while removing the default governance that can make strong
+models over-plan, over-verify, or keep working after the task is done.
 
 [中文说明](./README.zh-CN.md)
 
@@ -23,65 +24,99 @@ commands and plugin trust prompt when Codex asks.
 
 ## Status
 
-Codex Conductor is experimental and currently published as a `0.1.x` local
-plugin. The CLI and plugin install path are usable, but the Codex plugin
-manifest and hook APIs may still change.
+Codex Conductor 0.2.x is experimental. The CLI, curated MCPs, skills, hooks,
+and local marketplace install path are usable, but Codex plugin APIs may still
+change.
+
+## Design Boundary
+
+Conductor separates capability from governance:
+
+| Layer | Included | Default behavior |
+| --- | --- | --- |
+| Session orchestration | visible dispatch plans, project routing, collection | only for explicit or clearly orchestration-shaped work |
+| Lightweight execution | `conductor-lite` | explicit opt-in; direct work, brief planning only when needed, one focused verification pass |
+| Engineering quality | proportional design/plan artifacts, project-first standards, real test files, functional acceptance | applied while building; review lenses are not automatic gates |
+| Code intelligence | LSP, grep.app, Context7, optional CodeGraph, Windows Git Bash | available on demand; no post-edit blocking diagnostics |
+| Project context | project-rule loading and file-rule matching | context-only hooks; upstream model-specific rules are excluded |
+| Specialist knowledge | selected/adapted engineering skills | soft activation or explicit opt-in |
+
+The plugin deliberately does not include automatic update checks, telemetry,
+configuration migration, background CodeGraph provisioning, forced planning,
+goal/ledger loops, stop-continuation hooks, execution evidence gates, or the
+upstream comment-checker blocker.
+
+## Proportional Engineering Quality
+
+For substantive delivery, Conductor Lite loads a compact engineering-quality
+reference and applies it according to the task:
+
+- Preserve durable architecture or tradeoff decisions in a design document,
+  and durable multi-stage coordination in a plan document. Small local changes
+  do not manufacture both artifacts.
+- Choose the coding standard before implementation. Explicit user and repository
+  rules win, then official ecosystem conventions, then an appropriate mature
+  large-scale guide such as Google's when it is compatible with the codebase.
+- Put unit tests in actual repository test files. One-off commands and manual
+  reproducers are verification evidence, not unit tests.
+- Accept features through their real UI, API, CLI, integration, or runtime
+  path. A build or unit test suite does not substitute for functional
+  acceptance.
+- Review design/plan, code, tests, and function as distinct perspectives. One
+  reviewer may apply them in one focused pass; extra sessions are not the
+  default.
+
+The durable rationale is in the
+[engineering quality model](docs/design/engineering-quality-model.md), with the
+[integration plan](docs/plans/2026-07-14-engineering-quality-integration.md)
+tracking this repository change.
 
 ## What It Does
 
 - Registers and switches named local projects from the terminal.
 - Opens or runs Codex CLI commands in the active project.
-- Generates dispatch prompts for Codex App coordinator threads.
-- Installs focused Codex skills for coordination, dispatch, project routing,
-  and execution result collection.
-- Installs a conservative `UserPromptSubmit` hook that suggests Conductor when
-  a prompt looks like multi-thread, multi-session, project, or worker
-  orchestration work.
-
-Conductor does not run an MCP server. V1 intentionally uses Codex App's native
-thread tools for durable App-side thread orchestration while keeping the
-dispatch protocol centered on session units.
+- Generates session-first dispatch prompts for Codex App coordinator threads.
+- Packages focused skills for orchestration, direct execution, code search,
+  session discovery, Git, LSP, debugging, frontend work, refactoring, and QA.
+- Exposes five MCP integrations: grep.app, Context7, LSP, Windows Git Bash, and
+  optional CodeGraph.
+- Loads project rules through non-blocking lifecycle hooks.
+- Uses a conservative prompt hook to recommend Conductor for orchestration
+  without creating sessions or mutating the workspace itself.
 
 ## Visible Dispatch Model
 
-Conductor keeps the current Codex thread as the coordinator. The coordinator
-makes orchestration visible no matter which execution capability it uses:
+Conductor keeps the current Codex task as the coordinator:
 
-1. Show a `Dispatch Plan` before creating or messaging execution units.
-2. Create or message worker sessions/threads, or collector sessions, for
-   meaningful work units.
-3. Give every nested dispatch its own visible plan and fan-out budget.
-4. Collect child results and synthesize the final answer in the coordinator
-   thread.
+1. Show a concise `Dispatch Plan` before creating or messaging execution units.
+2. Use Codex App session/thread units for meaningful independent work.
+3. Give nested dispatch a visible plan and a fan-out budget.
+4. Collect child results and synthesize the final answer in the coordinator.
 
-Worker sessions/threads are the execution artifacts. Conductor does not create
-a hidden session-operator just to perform thread API calls. A collector can be
-created as a visible session when result collection is substantial, but the
-coordinator remains responsible for the final synthesis.
-
-When work is project-scoped, durable, parallel, or expected to live in its own
-session, Conductor uses Codex App session/thread units directly. If native
-session tools are unavailable, the coordinator should keep the work local or
-ask for a supported session path.
+Session/thread units are the visible execution artifacts. Conductor does not
+create a hidden session operator just to call thread APIs. If native session
+tools are unavailable, it keeps the work in the coordinator or asks for a
+supported session path.
 
 ## Requirements
 
 - macOS or Linux shell environment
-- Codex CLI installed and authenticated, with plugin install commands available
-- Node.js on `PATH` for the prompt hook
+- Codex CLI installed and authenticated, with plugin commands available
+- Node.js 20 or newer for local hooks and MCP runtimes
+- Python 3 only for skills that explicitly use their bundled Python helpers
 
 ## Install
 
 ### Native Codex Install
 
-Install the marketplace with Codex's native plugin commands:
+Install the Git marketplace and plugin:
 
 ```bash
 codex plugin marketplace add ZhouhaoJiang/codex-conductor
 codex plugin add codex-conductor@codex-conductor
 ```
 
-For a local clone, use the clone path as the marketplace root:
+For a local clone:
 
 ```bash
 git clone https://github.com/ZhouhaoJiang/codex-conductor.git
@@ -90,83 +125,63 @@ codex plugin marketplace add "$PWD"
 codex plugin add codex-conductor@codex-conductor
 ```
 
-Then link the optional CLI:
+Then optionally link the CLI:
 
 ```bash
 mkdir -p ~/.local/bin
 ln -sf "$PWD/plugins/codex-conductor/bin/codex-conductor" ~/.local/bin/codex-conductor
 ```
 
-Open `/plugins` in Codex App if you prefer to install from the plugin UI after
-adding the marketplace.
-
 ### Convenience Installer
 
-`./install.sh` wraps the native commands above and also links the CLI:
+`./install.sh` registers the local marketplace, installs the plugin, and links
+the CLI:
 
 ```bash
 ./install.sh
 ```
 
-The installer:
+Useful options:
 
-1. Registers this repo as the `codex-conductor` Codex plugin marketplace.
-2. Installs `codex-conductor@codex-conductor`, including the bundled skill and prompt hook.
-3. Links the CLI to `~/.local/bin/codex-conductor` by default.
+```bash
+./install.sh --no-cli
+./install.sh --cli-dir /usr/local/bin
+./install.sh --dry-run
+```
 
-The installer automatically looks for a Codex CLI binary that supports
-`codex plugin add`. If an older `codex` appears first on `PATH`, point the
-installer at a newer binary:
+If an older Codex CLI appears first on `PATH`:
 
 ```bash
 CODEX_BIN=/Applications/Codex.app/Contents/Resources/codex ./install.sh
 ```
 
-Use a different CLI directory:
+### Optional CodeGraph
+
+CodeGraph has a large platform runtime, so Conductor never downloads it during
+session startup. Install the pinned runtime explicitly:
 
 ```bash
-./install.sh --cli-dir /usr/local/bin
+./install.sh --with-codegraph
 ```
 
-Skip CLI linking:
+It is stored under `~/.local/share/codex-conductor/codegraph` by default. Set
+`CODEX_CONDUCTOR_RUNTIME_HOME` to choose another runtime root, or set
+`CODEX_CONDUCTOR_CODEGRAPH_BIN` to use an existing executable.
 
-```bash
-./install.sh --no-cli
-```
-
-Preview the commands without changing anything:
-
-```bash
-./install.sh --dry-run
-```
-
-`--dry-run` is a verification tool, not an installation step.
-
-After installation, start a new Codex thread so Codex loads the new skill and
-hook.
+After installing or upgrading the plugin, start a new Codex task so Codex loads
+the refreshed skills, hooks, and MCP manifest.
 
 ## Upgrade
 
-Git marketplaces are installed from snapshots. A GitHub marketplace source does
-not live-sync an already installed plugin after this repo changes.
-
-To upgrade later:
+Git marketplaces are installed from snapshots. Refresh and reinstall with:
 
 ```bash
 codex plugin marketplace upgrade codex-conductor
 codex plugin add codex-conductor@codex-conductor
 ```
 
-If you are not sure which marketplaces are configured:
-
-```bash
-codex plugin marketplace list
-codex plugin marketplace upgrade
-codex plugin add codex-conductor@codex-conductor
-```
-
-Start a new Codex thread after upgrading so Codex reloads the updated skills and
-hooks.
+For a local marketplace checkout, running `./install.sh` again refreshes the
+installed snapshot.
 
 ## CLI Quick Start
 
@@ -174,12 +189,12 @@ hooks.
 codex-conductor project add app ~/projects/my-app
 codex-conductor project use app
 codex-conductor project list
-codex-conductor dispatch "split this into db, backend, and ui worker sessions"
+codex-conductor dispatch "split this into db, backend, and ui sessions"
 ```
 
-Useful commands:
+Available commands:
 
-```bash
+```text
 codex-conductor project add <name> <absolute-path> [profile]
 codex-conductor project use <name>
 codex-conductor project current
@@ -192,39 +207,59 @@ codex-conductor fork <thread-id-or-name> [prompt...]
 codex-conductor dispatch [name] <goal...>
 ```
 
-Set `CODEX_CONDUCTOR_HOME` to store CLI state somewhere other than
+Set `CODEX_CONDUCTOR_HOME` to store CLI project state somewhere other than
 `~/.codex-conductor`.
 
 ## Codex App Usage
 
-In a new Codex App thread, try:
+For visible multi-session orchestration:
 
 ```text
-Use Codex Conductor to split this task into worker sessions.
+CCC split this task into focused sessions and collect the result.
 ```
 
-The installed skill guides the coordinator thread to:
+For fast direct execution in the current task:
 
-- find or target a project
-- show a concise dispatch plan before creating execution units
-- create or message worker sessions/threads, or collector sessions
-- assign narrow worker roles and fan-out budgets
-- set readable thread titles
-- collect child results
-- synthesize the final result in the coordinator thread
+```text
+Conductor Lite: implement this directly and verify the changed path once.
+```
 
-The prompt hook only injects a recommendation. It does not create threads by
-itself.
+`CCC` and `/ccc` trigger the orchestration recommendation when used as
+standalone tokens. Prompts beginning with `codex conductor`, `codex-conductor`,
+`codex con`, or `conductor` also trigger it. `CCC Lite` and `Conductor Lite`
+select the direct lane and are intentionally not routed into orchestration.
 
-When a prompt already triggers Conductor through `CCC`, a shortcut, or a
-worker/session/project-shaped request, the hook also recommends pairing
-Conductor with ULW for delivery-shaped work. This keeps the trigger surface
-predictable while letting `CCC ...` replace the heavier `CCC ULW ...` habit.
+For delivery-shaped Conductor work, the hook pairs coordination with the
+bundled `conductor-lite` discipline instead of depending on an external
+execution loop.
 
-`CCC` and `/ccc` act as magic words and trigger the hook when they appear as
-standalone tokens anywhere in the prompt. Shortcut prompts also trigger when
-they start with `codex conductor`, `codex-conductor`, `codex con`, or
-`conductor`.
+## Packaged Capabilities
+
+MCPs:
+
+- `grep_app` — remote public-code search
+- `context7` — remote library documentation lookup
+- `lsp` — local diagnostics, symbols, definitions, references, and rename
+- `git_bash` — local Git Bash execution on native Windows
+- `codegraph` — optional local repository graph MCP
+
+Non-blocking hooks:
+
+- Conductor recommendation on orchestration-shaped prompts
+- project rules on session start and prompt submit
+- matching project file rules after `apply_patch`
+- project-rule cache reset after compaction
+- Windows Git Bash recommendation and reminder reset
+
+Curated skills include the four Conductor skills plus `conductor-lite`,
+`ast-grep`, `coding-agent-sessions`, `debugging`, `frontend`, `git-master`,
+`lsp`, `lsp-setup`, `programming-strict`, `refactor`, `remove-ai-slops`,
+`rules`, `ultimate-browsing`, and `visual-qa`.
+
+`programming-strict` retains the deep strict-programming reference but is
+explicit opt-in. The adapted debugging, frontend, refactor, cleanup, and visual
+QA skills use focused single-pass workflows rather than automatic parallel
+review gates.
 
 ## Repository Layout
 
@@ -232,35 +267,37 @@ they start with `codex conductor`, `codex-conductor`, `codex con`, or
 .agents/plugins/marketplace.json
 plugins/codex-conductor/
   .codex-plugin/plugin.json
-  assets/icon.png
-  assets/logo.png
-  assets/logo-dark.png
-  assets/logo.svg
+  .mcp.json
   bin/codex-conductor
-  hooks/user-prompt-submit-recommending-conductor.json
-  scripts/conductor-hook.mjs
-  scripts/smoke-test
-  skills/conductor/SKILL.md
-  skills/conductor-dispatch/SKILL.md
-  skills/conductor-projects/SKILL.md
-  skills/conductor-collector/SKILL.md
+  hooks/
+  runtime/
+    git-bash-hook/
+    git-bash-mcp/
+    lsp-daemon/
+    rules/
+  scripts/
+    codegraph-mcp.mjs
+    conductor-hook.mjs
+    install-codegraph-runtime
+    rules-hook.mjs
+    smoke-test
+  skills/
+  THIRD_PARTY_NOTICES.md
 ```
 
 ## Development Verification
 
-These commands are for contributors validating a local checkout. They are not
-the user install path.
-
-Run:
-
 ```bash
 plugins/codex-conductor/scripts/smoke-test
 node --check plugins/codex-conductor/scripts/conductor-hook.mjs
+node --check plugins/codex-conductor/scripts/codegraph-mcp.mjs
+node --check plugins/codex-conductor/scripts/rules-hook.mjs
 python3 -m json.tool plugins/codex-conductor/.codex-plugin/plugin.json >/dev/null
-python3 -m json.tool plugins/codex-conductor/hooks/user-prompt-submit-recommending-conductor.json >/dev/null
-bash -n install.sh plugins/codex-conductor/bin/codex-conductor plugins/codex-conductor/scripts/smoke-test
+python3 -m json.tool plugins/codex-conductor/.mcp.json >/dev/null
+bash -n install.sh plugins/codex-conductor/bin/codex-conductor \
+  plugins/codex-conductor/scripts/install-codegraph-runtime \
+  plugins/codex-conductor/scripts/smoke-test
 ./install.sh --dry-run
-codex plugin add codex-conductor@codex-conductor --json
 ```
 
 ## Contributing And Security
@@ -270,4 +307,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md), and
 
 ## License
 
-MIT
+Conductor's original code is MIT. Selected OMO shared skills and Git Bash
+components remain under Sustainable Use License 1.0. The MIT Rules/LSP
+components and all modifications are identified in
+[THIRD_PARTY_NOTICES.md](./plugins/codex-conductor/THIRD_PARTY_NOTICES.md); the
+applicable license is also included inside each third-party directory.

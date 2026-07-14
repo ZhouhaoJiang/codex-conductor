@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/runtime/git-bash-hook/dist/cli.js\" hook pre-tool-use",
+            "timeout": 5,
+            "statusMessage": "Checking Windows Git Bash support"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${PLUGIN_ROOT}/runtime/git-bash-hook/dist/cli.js\" hook post-compact",
+            "timeout": 5,
+            "statusMessage": "Resetting Git Bash reminder"
+          }
+        ]
+      }
+    ]
+  }
+}

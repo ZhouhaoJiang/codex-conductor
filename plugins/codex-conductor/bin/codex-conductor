@@ -183,6 +183,10 @@ Project:
 Goal:
 $*
 
+Use the bundled conductor-lite discipline inside delivery sessions: work
+directly, add only a brief decision-oriented plan when needed, and run one
+focused verification pass without creating duplicate workflow state.
+
 Act as the coordinator thread. Before creating or messaging execution units,
 show a concise Dispatch Plan that lists each session unit, kind (session or
 collector), target project or cwd, deliverable, expected evidence, whether

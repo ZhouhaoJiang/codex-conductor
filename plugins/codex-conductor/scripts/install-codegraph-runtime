@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CODEGRAPH_VERSION="1.4.1"
+RUNTIME_HOME="${CODEX_CONDUCTOR_RUNTIME_HOME:-$HOME/.local/share/codex-conductor}"
+INSTALL_DIR="$RUNTIME_HOME/codegraph"
+BINARY_NAME="codegraph"
+[[ "${OS:-}" == "Windows_NT" ]] && BINARY_NAME="codegraph.cmd"
+BINARY="$INSTALL_DIR/node_modules/.bin/$BINARY_NAME"
+
+command -v node >/dev/null 2>&1 || {
+  printf 'error: node was not found in PATH\n' >&2
+  exit 1
+}
+command -v npm >/dev/null 2>&1 || {
+  printf 'error: npm was not found in PATH\n' >&2
+  exit 1
+}
+
+if [[ -x "$BINARY" || -f "$BINARY" ]]; then
+  installed_version="$(node -e 'try { process.stdout.write(require(process.argv[1]).version ?? "") } catch {}' "$INSTALL_DIR/node_modules/@colbymchenry/codegraph/package.json")"
+  if [[ "$installed_version" == "$CODEGRAPH_VERSION" ]]; then
+    printf 'CodeGraph %s is already installed at %s\n' "$CODEGRAPH_VERSION" "$INSTALL_DIR"
+    exit 0
+  fi
+fi
+
+mkdir -p "$INSTALL_DIR"
+npm install \
+  --prefix "$INSTALL_DIR" \
+  --no-audit \
+  --no-fund \
+  --omit=dev \
+  --save-exact \
+  "@colbymchenry/codegraph@$CODEGRAPH_VERSION"
+
+[[ -x "$BINARY" || -f "$BINARY" ]] || {
+  printf 'error: CodeGraph installed without an executable at %s\n' "$BINARY" >&2
+  exit 1
+}
+
+printf 'Installed CodeGraph %s at %s\n' "$CODEGRAPH_VERSION" "$INSTALL_DIR"

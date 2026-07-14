@@ -1,0 +1,4 @@
+interface:
+  display_name: "Conductor Lite"
+  short_description: "Help with Conductor Lite tasks"
+  default_prompt: "Use $conductor-lite to complete this directly with one focused verification pass."
