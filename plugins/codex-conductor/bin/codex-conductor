@@ -187,26 +187,33 @@ Use the bundled conductor-lite discipline inside delivery sessions: work
 directly, add only a brief decision-oriented plan when needed, and run one
 focused verification pass without creating duplicate workflow state.
 
-Act as the coordinator thread. Before creating or messaging execution units,
-show a concise Dispatch Plan that lists each session unit, kind (session or
-collector), target project or cwd, deliverable, expected evidence, whether
-changes are allowed, and fan-out budget.
+Act as the coordinator thread. Before creating or messaging delegated execution
+units, show a concise Dispatch Plan that lists each unit's kind (subagent,
+session, or collector), lifecycle (task-local or durable), target project or
+cwd, deliverable, expected evidence, whether changes are allowed, and fan-out
+budget.
 
-Use Codex App session/thread units for project sessions, worker sessions,
-durable workers, project-scoped code changes, parallel investigation, or any
-task where a separate execution context is expected.
+Choose the smallest native execution unit that matches the work. Keep small or
+sequential work in the coordinator. Use bounded native subagents for
+short-lived, task-local investigation, review, comparison, testing, or
+verification. Give each subagent one concrete deliverable.
 
-Treat session units as user-visible execution evidence, set clear titles where
-supported, and do not create a separate session-operator just to call thread
-APIs. If session/thread tools are unavailable, keep the work in this
-coordinator or ask for a supported session path.
+Use Codex App session/thread units when the user explicitly asks for a project
+session, worker session, thread, or another durable, user-visible, cross-turn,
+handoff, or independent-worktree execution artifact.
+
+Treat sessions as user-visible execution artifacts and subagents as bounded
+task-local execution evidence. Do not create a separate session-operator just
+to call thread APIs. If the preferred primitive is unavailable, keep the work
+in this coordinator or use another native primitive only when its lifecycle
+still matches the request.
 
 Allow nested dispatch only when a child unit first shows its own Dispatch Plan,
 stays within its fan-out budget, and reports child evidence back to you.
 
 Optionally dispatch a collector unit when result collection is substantial.
-Collect child results with read_thread, then synthesize the final answer in this
-coordinator thread.
+Collect subagent results with native collaboration tools and session results
+with read_thread, then synthesize the final answer in this coordinator thread.
 EOF
 }
 

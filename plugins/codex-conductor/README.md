@@ -4,14 +4,17 @@
   <img src="assets/icon.png" alt="Codex Conductor logo" width="96">
 </p>
 
-Codex Conductor 0.2.x combines visible Codex session orchestration with a
-curated, lightweight engineering capability pack.
+Codex Conductor 0.2.x combines native Codex orchestration with a curated,
+lightweight engineering capability pack: bounded task-local subagents for
+short-lived independent work and visible sessions for durable work.
 
 ## Two Execution Lanes
 
-- `conductor` coordinates project/session dispatch, collection, and synthesis.
+- `conductor` selects between bounded subagents and durable project/session
+  dispatch, then coordinates collection and synthesis.
 - `conductor-lite` works directly in the current task, plans only around real
-  decisions or risk, and runs one focused verification pass.
+  decisions or risk, uses bounded subagents only when independence materially
+  helps, and runs one focused verification pass.
 
 Use `CCC ...` for orchestration and `CCC Lite ...` or `Conductor Lite ...` for
 the direct lane. The prompt hook intentionally does not route Lite selectors
@@ -24,8 +27,8 @@ For substantive implementation or technical design, `conductor-lite` loads its
 They preserve durable design and plan decisions, choose standards in
 user/repository-first order with compatible mature guides as a fallback, put
 unit tests in actual test files, separate functional acceptance from builds and
-unit tests, and apply distinct review lenses without forcing extra reviewers or
-sessions.
+unit tests, and apply distinct review lenses without forcing extra execution
+units.
 
 ## Curated Capability Layer
 
@@ -99,15 +102,17 @@ CodeGraph is optional and is never downloaded by a session hook:
 
 Start a new Codex task after installation so Codex reloads the plugin snapshot.
 
-## Visible Dispatch Model
+## Native Dispatch Model
 
 The current Codex task stays responsible for coordination. Before creating or
-messaging session/thread units, it shows a concise `Dispatch Plan` with each
-unit's target, deliverable, evidence, permissions, and fan-out budget. Child
-results are collected and synthesized in the coordinator.
+messaging delegated units, it shows a concise `Dispatch Plan` with each unit's
+kind, lifecycle, target, deliverable, evidence, permissions, and fan-out budget.
+Bounded native subagents handle short-lived task-local work. Codex App
+sessions/threads are reserved for explicitly requested durable, user-visible,
+cross-turn, handoff, or independent-worktree execution.
 
-If native session tools are unavailable, keep the work in the coordinator or
-ask for a supported session path.
+If the matching primitive is unavailable, keep the work in the coordinator or
+use another native primitive only when its lifecycle still matches the request.
 
 ## Prompt Hook Examples
 

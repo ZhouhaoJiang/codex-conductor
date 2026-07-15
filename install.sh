@@ -165,7 +165,7 @@ Codex Conductor installed.
 
 Next steps:
   1. Start a new Codex task so plugin skills and hooks are loaded.
-  2. Try: "Use Codex Conductor to split this task into worker sessions."
+  2. Try: "Use Codex Conductor to choose bounded subagents or durable sessions."
   3. Try: "Conductor Lite: finish this directly."
   4. CLI: codex-conductor help
 

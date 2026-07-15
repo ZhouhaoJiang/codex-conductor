@@ -87,9 +87,10 @@ Use distinct questions without automatically creating distinct processes:
   relevant environment and states?
 
 One focused review pass may apply all relevant lenses, and the same reviewer
-may switch perspectives deliberately. Use separate reviewers or Conductor
-sessions only when the user asks for them or genuine independence materially
-improves confidence. Do not turn the lenses into mandatory sequential gates.
+may switch perspectives deliberately. When genuine independence materially
+improves confidence, use bounded native subagents for task-local review lanes.
+Use Conductor sessions only when the user explicitly asks for durable,
+user-visible reviewers. Do not turn the lenses into mandatory sequential gates.
 
 ## Completion evidence
 

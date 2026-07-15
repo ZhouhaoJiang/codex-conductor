@@ -133,15 +133,17 @@ use the conductor skill for dispatch/session coordination and conductor-lite for
 direct execution with one focused verification pass. For tiny read-only
 questions, keep it lightweight.
 
-When Conductor is accepted, keep the current thread as the coordinator, use
-Codex App session/thread units exposed by this environment, and show a concise
-Dispatch Plan before creating or messaging session units.
+When Conductor is accepted, keep the current thread as the coordinator, use the
+native execution primitives exposed by this environment, and show a concise
+Dispatch Plan before creating or messaging delegated units.
 
-Default to Codex App session/thread units for project sessions, worker
-sessions, durable workers, project-scoped code changes, parallel investigation,
-or any prompt where a separate execution context is expected. If session/thread
-tools are unavailable, keep the work in the coordinator or ask for a supported
-session path rather than creating non-session workers.`;
+Use bounded native subagents for short-lived, task-local investigation, review,
+comparison, testing, or verification. Default to Codex App session/thread units
+for project sessions, worker sessions, durable workers, or any prompt that
+explicitly asks for a user-visible, cross-turn, handoff, or independent-worktree
+artifact. If the preferred primitive is unavailable, keep the work in the
+coordinator or use another native primitive only when its lifecycle still
+matches the request.`;
 }
 
 function formatAdditionalContext(additionalContext) {

@@ -31,7 +31,7 @@ Conductor 把“能力”和“治理”分开：
 
 | 层 | 保留内容 | 默认行为 |
 | --- | --- | --- |
-| Session 调度 | 可见 Dispatch Plan、项目路由、结果收集 | 只在明确要求或任务明显需要调度时启用 |
+| 原生调度 | 有边界的 task-local subagent、可见 Session Dispatch Plan、项目路由、结果收集 | 默认直接执行；只有明确需要持久或可见产物时才创建 session |
 | 轻量执行 | `conductor-lite` | 显式启用；能直接做就直接做，只在必要时写短计划，只做一轮聚焦验证 |
 | 工程质量 | 按规模创建设计/计划产物、项目规范优先、真实测试文件、功能验收 | 在实现过程中执行；review 视角不是自动门禁 |
 | 代码智能 | LSP、grep.app、Context7、可选 CodeGraph、Windows Git Bash | 按需使用，不挂每次编辑后的阻断诊断 |
@@ -56,7 +56,8 @@ goal/ledger 循环、Stop 续跑、执行证据门禁，以及上游 comment-che
 - 功能通过真实 UI、API、CLI、集成或运行时路径验收；构建或单测通过不能替代功能
   验收。
 - 设计/计划、代码、测试、功能是不同 review 视角，但可以由同一个 reviewer 在
-  一轮聚焦检查中切换；默认不因此增加 session。
+  一轮聚焦检查中切换；独立视角确实提高可信度时可以使用有边界的原生 subagent，
+  但默认不因此增加 session。
 
 完整决策见[工程质量模型](docs/design/engineering-quality-model.md)，本次仓库改动由
 [融合计划](docs/plans/2026-07-14-engineering-quality-integration.md)记录。
@@ -65,26 +66,28 @@ goal/ledger 循环、Stop 续跑、执行证据门禁，以及上游 comment-che
 
 - 在终端注册和切换本地项目。
 - 在当前项目打开或运行 Codex CLI。
-- 为 Codex App 主控任务生成 session-first dispatch prompt。
+- 为 Codex App 主控任务生成能够区分执行单元生命周期的 dispatch prompt。
 - 提供调度、直接执行、代码搜索、历史 session 检索、Git、LSP、调试、前端、
   重构和 QA 等聚焦 skills。
 - 提供五个 MCP：grep.app、Context7、LSP、Windows Git Bash、可选 CodeGraph。
 - 用非阻断生命周期 Hook 加载项目规则。
-- 用保守的 prompt hook 提醒是否该使用 Conductor，但不会自行创建 session 或
+- 用保守的 prompt hook 提醒是否该使用 Conductor，但不会自行创建执行单元或
   修改工作区。
 
-## 可见调度模型
+## 原生调度模型
 
 Conductor 保持当前 Codex task 为主控：
 
 1. 创建或发送执行单元前，先展示简短的 `Dispatch Plan`。
-2. 用 Codex App session/thread 单元承载有意义的独立工作。
-3. Nested dispatch 也要展示计划，并受 fan-out budget 约束。
-4. 收集子结果，在主控 task 汇总最终答案。
+2. 用有边界的原生 subagent 承载短时、task-local 的独立工作。
+3. 只有明确需要持久、用户可见的执行产物时才使用 Codex App session/thread。
+4. Nested dispatch 也要展示计划，并受有限 fan-out budget 约束。
+5. 收集子结果，在主控 task 汇总最终答案。
 
-Session/thread 本身就是用户可见的执行产物。Conductor 不会额外创建一个隐藏的
-session operator 只为调用 thread API。当前环境没有原生 session 工具时，它会
-留在主控 task 处理，或询问可用的 session 路径。
+Subagent 是限制在当前 task 内的 Codex 原生执行能力；session/thread 是持久、用户
+可见的执行产物。Conductor 不会额外创建一个隐藏的 session operator 只为调用
+thread API。缺少匹配的原生能力时，它会留在主控 task，除非另一种原生执行单元具有
+相同的生命周期语义。
 
 ## 环境要求
 

@@ -34,7 +34,7 @@ Conductor separates capability from governance:
 
 | Layer | Included | Default behavior |
 | --- | --- | --- |
-| Session orchestration | visible dispatch plans, project routing, collection | only for explicit or clearly orchestration-shaped work |
+| Native orchestration | bounded task-local subagents, visible session dispatch plans, project routing, collection | direct by default; sessions only for explicit durable or user-visible work |
 | Lightweight execution | `conductor-lite` | explicit opt-in; direct work, brief planning only when needed, one focused verification pass |
 | Engineering quality | proportional design/plan artifacts, project-first standards, real test files, functional acceptance | applied while building; review lenses are not automatic gates |
 | Code intelligence | LSP, grep.app, Context7, optional CodeGraph, Windows Git Bash | available on demand; no post-edit blocking diagnostics |
@@ -63,8 +63,9 @@ reference and applies it according to the task:
   path. A build or unit test suite does not substitute for functional
   acceptance.
 - Review design/plan, code, tests, and function as distinct perspectives. One
-  reviewer may apply them in one focused pass; extra sessions are not the
-  default.
+  reviewer may apply them in one focused pass; bounded native subagents are
+  available when independence materially improves confidence, while extra
+  sessions are not the default.
 
 The durable rationale is in the
 [engineering quality model](docs/design/engineering-quality-model.md), with the
@@ -75,28 +76,32 @@ tracking this repository change.
 
 - Registers and switches named local projects from the terminal.
 - Opens or runs Codex CLI commands in the active project.
-- Generates session-first dispatch prompts for Codex App coordinator threads.
+- Generates execution-unit-aware dispatch prompts for Codex App coordinator
+  threads.
 - Packages focused skills for orchestration, direct execution, code search,
   session discovery, Git, LSP, debugging, frontend work, refactoring, and QA.
 - Exposes five MCP integrations: grep.app, Context7, LSP, Windows Git Bash, and
   optional CodeGraph.
 - Loads project rules through non-blocking lifecycle hooks.
 - Uses a conservative prompt hook to recommend Conductor for orchestration
-  without creating sessions or mutating the workspace itself.
+  without creating execution units or mutating the workspace itself.
 
-## Visible Dispatch Model
+## Native Dispatch Model
 
 Conductor keeps the current Codex task as the coordinator:
 
 1. Show a concise `Dispatch Plan` before creating or messaging execution units.
-2. Use Codex App session/thread units for meaningful independent work.
-3. Give nested dispatch a visible plan and a fan-out budget.
-4. Collect child results and synthesize the final answer in the coordinator.
+2. Use bounded native subagents for short-lived, task-local independent work.
+3. Use Codex App session/thread units for explicitly requested durable,
+   user-visible work.
+4. Give nested dispatch a visible plan and a finite fan-out budget.
+5. Collect child results and synthesize the final answer in the coordinator.
 
-Session/thread units are the visible execution artifacts. Conductor does not
-create a hidden session operator just to call thread APIs. If native session
-tools are unavailable, it keeps the work in the coordinator or asks for a
-supported session path.
+Subagents are native Codex execution primitives bounded to the current task;
+session/thread units are durable, user-visible artifacts. Conductor does not
+create a hidden session operator just to call thread APIs. If the matching
+primitive is unavailable, it keeps the work in the coordinator unless another
+native primitive has the same lifecycle semantics.
 
 ## Requirements
 

@@ -4,6 +4,15 @@ All notable changes to Codex Conductor will be documented in this file.
 
 ## Unreleased
 
+## 0.2.2 - 2026-07-15
+
+- Restored bounded native subagents as Codex's task-local execution primitive
+  for independent investigation, review, comparison, testing, and verification.
+- Reserved Codex App sessions/threads for explicitly requested durable,
+  user-visible, cross-turn, handoff, or independent-worktree execution.
+- Replaced the blanket ban on subagent terminology with semantic smoke coverage
+  for execution-unit selection and finite fan-out.
+
 ## 0.2.1 - 2026-07-14
 
 - Added proportional engineering-quality defaults to `conductor-lite`: scale

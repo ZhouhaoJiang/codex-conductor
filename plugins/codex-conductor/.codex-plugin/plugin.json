@@ -1,7 +1,7 @@
 {
   "name": "codex-conductor",
-  "version": "0.2.1",
-  "description": "Coordinate Codex projects and sessions with lightweight execution, curated MCPs, skills, and non-blocking hooks.",
+  "version": "0.2.2",
+  "description": "Coordinate Codex projects with bounded native subagents, durable sessions, lightweight execution, curated MCPs, skills, and non-blocking hooks.",
   "author": {
     "name": "Codex Conductor contributors"
   },
@@ -9,6 +9,7 @@
   "keywords": [
     "codex",
     "orchestration",
+    "subagents",
     "threads",
     "projects",
     "cli"
@@ -22,8 +23,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Conductor",
-    "shortDescription": "Session orchestration plus a lightweight engineering capability pack.",
-    "longDescription": "Codex Conductor bundles visible project/session orchestration, a direct Conductor Lite lane with proportional engineering-quality defaults, curated code-intelligence MCPs, focused engineering skills, and non-blocking project-context hooks.",
+    "shortDescription": "Native subagent and session orchestration plus lightweight engineering capabilities.",
+    "longDescription": "Codex Conductor bundles bounded task-local subagents, visible durable project/session orchestration, a direct Conductor Lite lane with proportional engineering-quality defaults, curated code-intelligence MCPs, focused engineering skills, and non-blocking project-context hooks.",
     "developerName": "Codex Conductor contributors",
     "category": "Developer Tools",
     "capabilities": [
@@ -38,7 +39,7 @@
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/logo.png",
     "defaultPrompt": [
-      "Use Codex Conductor to split this task into worker sessions.",
+      "Use Codex Conductor to choose bounded subagents or durable sessions for this task.",
       "Use Conductor Lite to finish this change directly, apply proportional engineering quality, and run one focused verification pass.",
       "Show the active project and collect child results.",
       "Create a project-scoped dispatch plan for this goal."

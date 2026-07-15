@@ -23,9 +23,12 @@ directly names this skill. Ordinary prompts should use normal Codex behavior.
 4. Do not create duplicate goals, ledgers, evidence files, or checkpoints.
    Repository-native plans and artifacts still apply when the repository or
    user explicitly requires them.
-5. Do not delegate by default. Use Conductor session dispatch only when the
-   user asks for orchestration or independent work genuinely benefits from a
-   separate session.
+5. Do not delegate by default. Use a small, bounded set of native subagents only
+   when short-lived independent investigation, review, comparison, testing, or
+   verification materially improves speed or confidence. Use Conductor
+   session/thread dispatch only when the user explicitly asks for a durable,
+   user-visible, cross-turn, handoff, or independent-worktree execution
+   artifact.
 6. Make the smallest coherent change that fulfills the request and preserves
    nearby conventions.
 7. Run one focused verification pass covering the changed behavior. Add more
@@ -51,6 +54,7 @@ workspace, make the safest narrow assumption, and continue.
 ## Relationship to Conductor
 
 - `conductor-lite` governs execution inside the current session.
-- `conductor` governs visible session/thread dispatch and collection.
+- `conductor` selects between bounded task-local subagents and visible,
+  durable session/thread dispatch and collection.
 - They can be paired: Conductor coordinates; Conductor Lite keeps each delivery
   lane direct and lightweight.

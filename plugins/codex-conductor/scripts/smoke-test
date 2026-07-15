@@ -8,16 +8,6 @@ PROJECT_DIR="$(mktemp -d)"
 trap 'rm -rf "$STATE_HOME" "$PROJECT_DIR"' EXIT
 
 export CODEX_CONDUCTOR_HOME="$STATE_HOME"
-forbidden_worker_term="sub""agent"
-
-assert_no_forbidden_worker_term() {
-  local value_lower
-  value_lower="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
-  [[ "$value_lower" != *"$forbidden_worker_term"* ]] || {
-    printf '%s\n' "$2" >&2
-    exit 1
-  }
-}
 
 PLUGIN_DIR="$PLUGIN_DIR" node <<'NODE'
 const { existsSync, readFileSync } = require("node:fs");
@@ -357,20 +347,24 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt did not mention the visible dispatch plan\n' >&2
   exit 1
 }
-[[ "$dispatch" == *"session unit"* ]] || {
-  printf 'dispatch prompt did not make sessions the dispatch unit\n' >&2
+[[ "$dispatch" == *"kind (subagent,"* ]] || {
+  printf 'dispatch prompt did not distinguish execution-unit kinds\n' >&2
   exit 1
 }
-[[ "$dispatch" == *"user-visible execution evidence"* ]] || {
-  printf 'dispatch prompt did not describe visible execution evidence\n' >&2
+[[ "$dispatch" == *"bounded native subagents"* ]] || {
+  printf 'dispatch prompt did not preserve native subagents\n' >&2
   exit 1
 }
 [[ "$dispatch" == *"fan-out budget"* ]] || {
   printf 'dispatch prompt did not mention fan-out budget\n' >&2
   exit 1
 }
-[[ "$dispatch" == *"Use Codex App session/thread units"* ]] || {
-  printf 'dispatch prompt did not require session/thread units\n' >&2
+[[ "$dispatch" == *"Use Codex App session/thread units when the user explicitly asks"* ]] || {
+  printf 'dispatch prompt did not reserve sessions for explicit durable work\n' >&2
+  exit 1
+}
+[[ "$dispatch" == *"sessions as user-visible execution artifacts"* ]] || {
+  printf 'dispatch prompt did not describe durable session visibility\n' >&2
   exit 1
 }
 [[ "$dispatch" == *"conductor-lite"* ]] || {
@@ -381,8 +375,6 @@ dispatch="$("$CLI" dispatch sample split this task)"
   printf 'dispatch prompt still depends on the external ULW workflow\n' >&2
   exit 1
 }
-assert_no_forbidden_worker_term "$dispatch" \
-  "dispatch prompt used the forbidden non-session worker term"
 [[ "$dispatch" == *"session-operator"* ]] || {
   printf 'dispatch prompt did not reject session-operator dispatch\n' >&2
   exit 1
@@ -399,11 +391,17 @@ hook_output="$(printf '%s' "$hook_payload" | node "$PLUGIN_DIR/scripts/conductor
   exit 1
 }
 [[ "$hook_output" == *"Codex App session/thread units"* ]] || {
-  printf 'hook recommendation did not make sessions the dispatch unit\n' >&2
+  printf 'hook recommendation did not preserve durable sessions\n' >&2
   exit 1
 }
-assert_no_forbidden_worker_term "$hook_output" \
-  "hook recommendation used the forbidden non-session worker term"
+[[ "$hook_output" == *"bounded native subagents"* ]] || {
+  printf 'hook recommendation did not preserve native subagents\n' >&2
+  exit 1
+}
+[[ "$hook_output" == *"short-lived, task-local"* ]] || {
+  printf 'hook recommendation did not bound subagent lifecycle\n' >&2
+  exit 1
+}
 [[ "$hook_output" == *"conductor-lite"* ]] || {
   printf 'hook recommendation did not mention conductor-lite pairing\n' >&2
   exit 1
@@ -447,12 +445,11 @@ conductor_lite_output="$(printf '%s' "$conductor_lite_payload" | node "$PLUGIN_D
 
 ccc_project_session_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 给 hr-ai 起一个 project session 修这个问题"}'
 ccc_project_session_output="$(printf '%s' "$ccc_project_session_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
-[[ "$ccc_project_session_output" == *"Default to Codex App session/thread units for project sessions"* ]] || {
+[[ "$ccc_project_session_output" == *"Default to Codex App session/thread units"* &&
+   "$ccc_project_session_output" == *"for project sessions, worker sessions, durable workers"* ]] || {
   printf 'hook recommendation did not default project sessions to session/thread units\n' >&2
   exit 1
 }
-assert_no_forbidden_worker_term "$ccc_project_session_output" \
-  "project-session recommendation used the forbidden non-session worker term"
 
 shortcut_payload='{"hook_event_name":"UserPromptSubmit","session_id":"s","turn_id":"t","transcript_path":null,"cwd":"/tmp","model":"gpt-5","permission_mode":"default","prompt":"CCC 帮我拆成 worker 跑"}'
 shortcut_output="$(printf '%s' "$shortcut_payload" | node "$PLUGIN_DIR/scripts/conductor-hook.mjs" user-prompt-submit)"
