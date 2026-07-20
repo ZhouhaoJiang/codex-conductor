@@ -72,7 +72,8 @@ formatter、修改全局工具链或格式化无关文件。
 - `conductor-lite/SKILL.md` 只保留按需读取入口，避免每次激活都注入长规则。
 - `conductor-lite/references/engineering-quality.md` 保存可复用的完整默认判断。
 - `debugging`、`refactor` 和 `frontend` 只保留各自场景必须知道的测试或验收区别。
-- 不新增 always-on hook，不自动创建文档，不默认发起 review subagent 或 session。
+- 除产生实质项目成果后更新 `.ccc/<session-id>.md` 会话工作报告外，不自动创建
+  设计、计划或证据文档，也不默认发起 review subagent 或 session。
 
 ## 结果
 

@@ -47,11 +47,23 @@ Non-blocking hooks:
 - matching file rules after `apply_patch`
 - project-rule cache reset after compaction
 - Windows Git Bash reminder and reset
+- quiet session-start guidance for `.ccc/<session-id>.md`
 
 The plugin does not register automatic update, telemetry, configuration
 migration, background CodeGraph setup, post-edit LSP blockers,
 comment-checking blockers, stop-continuation, forced planning, or execution
 evidence gates.
+
+## Session Work Reports
+
+At session start, a non-blocking hook quietly guides Codex to keep one cumulative
+report at `.ccc/<session-id>.md` in the project Git root. Codex updates it only
+after substantive project work or durable findings, recording what was done,
+what was completed, and the verification result. Simple Q&A, clarification,
+planning-only, and status-only turns are skipped. The hook never writes or
+checks the report, blocks completion, or produces an extra user-facing message.
+The report must not contain chain-of-thought, prompts, raw transcripts, secrets,
+or routine tool logs.
 
 ## Skills
 

@@ -37,6 +37,7 @@ Conductor separates capability from governance:
 | Native orchestration | bounded task-local subagents, visible session dispatch plans, project routing, collection | direct by default; sessions only for explicit durable or user-visible work |
 | Lightweight execution | `conductor-lite` | explicit opt-in; direct work, brief planning only when needed, one focused verification pass |
 | Engineering quality | proportional design/plan artifacts, project-first standards, real test files, functional acceptance | applied while building; review lenses are not automatic gates |
+| Session work report | `.ccc/<session-id>.md` with a concise cumulative work, completion, and verification summary | quiet session-start guidance; written only after substantive project work |
 | Code intelligence | LSP, grep.app, Context7, optional CodeGraph, Windows Git Bash | available on demand; no post-edit blocking diagnostics |
 | Project context | project-rule loading and file-rule matching | context-only hooks; upstream model-specific rules are excluded |
 | Specialist knowledge | selected/adapted engineering skills | soft activation or explicit opt-in |
@@ -83,6 +84,7 @@ tracking this repository change.
 - Exposes five MCP integrations: grep.app, Context7, LSP, Windows Git Bash, and
   optional CodeGraph.
 - Loads project rules through non-blocking lifecycle hooks.
+- Guides Codex to maintain one concise project-local work report per session.
 - Uses a conservative prompt hook to recommend Conductor for orchestration
   without creating execution units or mutating the workspace itself.
 
@@ -102,6 +104,25 @@ session/thread units are durable, user-visible artifacts. Conductor does not
 create a hidden session operator just to call thread APIs. If the matching
 primitive is unavailable, it keeps the work in the coordinator unless another
 native primitive has the same lifecycle semantics.
+
+## Session Work Reports
+
+At `SessionStart`, a non-blocking hook quietly tells Codex where the current
+session report belongs: `.ccc/<session-id>.md` in the project Git root. Codex
+creates or updates it only after a turn produces substantive project work or
+durable findings, and keeps the content limited to:
+
+- what it did
+- what it completed
+- verification results, or why verification was not run
+
+Greetings, simple Q&A, explanations, clarification, approvals, planning-only,
+and status-only turns do not update the report. It is one cumulative report per
+session, not one section per message. The hook never writes, checks, or blocks
+completion, and never produces a follow-up message. Reports must not contain
+chain-of-thought, prompts, raw transcripts, secrets, or routine tool logs. They
+remain local session metadata and are not staged or committed unless the user
+explicitly asks.
 
 ## Requirements
 
@@ -255,6 +276,7 @@ Non-blocking hooks:
 - matching project file rules after `apply_patch`
 - project-rule cache reset after compaction
 - Windows Git Bash recommendation and reminder reset
+- quiet session-start guidance for `.ccc/<session-id>.md`
 
 Curated skills include the four Conductor skills plus `conductor-lite`,
 `ast-grep`, `coding-agent-sessions`, `debugging`, `frontend`, `git-master`,
@@ -285,6 +307,7 @@ plugins/codex-conductor/
     conductor-hook.mjs
     install-codegraph-runtime
     rules-hook.mjs
+    work-report-hook.mjs
     smoke-test
   skills/
   THIRD_PARTY_NOTICES.md
@@ -297,6 +320,7 @@ plugins/codex-conductor/scripts/smoke-test
 node --check plugins/codex-conductor/scripts/conductor-hook.mjs
 node --check plugins/codex-conductor/scripts/codegraph-mcp.mjs
 node --check plugins/codex-conductor/scripts/rules-hook.mjs
+node --check plugins/codex-conductor/scripts/work-report-hook.mjs
 python3 -m json.tool plugins/codex-conductor/.codex-plugin/plugin.json >/dev/null
 python3 -m json.tool plugins/codex-conductor/.mcp.json >/dev/null
 bash -n install.sh plugins/codex-conductor/bin/codex-conductor \

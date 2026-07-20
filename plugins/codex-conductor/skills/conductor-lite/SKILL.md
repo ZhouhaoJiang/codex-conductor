@@ -22,7 +22,10 @@ directly names this skill. Ordinary prompts should use normal Codex behavior.
    criterion. Keep that plan to 2-5 outcome-oriented steps.
 4. Do not create duplicate goals, ledgers, evidence files, or checkpoints.
    Repository-native plans and artifacts still apply when the repository or
-   user explicitly requires them.
+   user explicitly requires them. The plugin-managed
+   `.ccc/<session-id>.md` session work report is the single default exception;
+   update it only after substantive project work, but do not create extra
+   workflow files around it.
 5. Do not delegate by default. Use a small, bounded set of native subagents only
    when short-lived independent investigation, review, comparison, testing, or
    verification materially improves speed or confidence. Use Conductor

@@ -1,7 +1,7 @@
 {
   "name": "codex-conductor",
-  "version": "0.2.2",
-  "description": "Coordinate Codex projects with bounded native subagents, durable sessions, lightweight execution, curated MCPs, skills, and non-blocking hooks.",
+  "version": "0.2.2+codex.20260720072633",
+  "description": "Coordinate Codex projects with bounded native subagents, durable sessions, lightweight execution, curated MCPs, skills, and session work reports.",
   "author": {
     "name": "Codex Conductor contributors"
   },
@@ -17,14 +17,15 @@
   "hooks": [
     "./hooks/user-prompt-submit-recommending-conductor.json",
     "./hooks/project-rules.json",
-    "./hooks/git-bash.json"
+    "./hooks/git-bash.json",
+    "./hooks/work-report.json"
   ],
   "mcpServers": "./.mcp.json",
   "skills": "./skills/",
   "interface": {
     "displayName": "Codex Conductor",
     "shortDescription": "Native subagent and session orchestration plus lightweight engineering capabilities.",
-    "longDescription": "Codex Conductor bundles bounded task-local subagents, visible durable project/session orchestration, a direct Conductor Lite lane with proportional engineering-quality defaults, curated code-intelligence MCPs, focused engineering skills, and non-blocking project-context hooks.",
+    "longDescription": "Codex Conductor bundles bounded task-local subagents, visible durable project/session orchestration, a direct Conductor Lite lane with proportional engineering-quality defaults, curated code-intelligence MCPs, focused engineering skills, project-context hooks, and concise .ccc session work reports.",
     "developerName": "Codex Conductor contributors",
     "category": "Developer Tools",
     "capabilities": [
@@ -33,6 +34,7 @@
       "Code Intelligence",
       "Workflow",
       "Context Injection",
+      "Session Work Reports",
       "CLI"
     ],
     "brandColor": "#14B8A6",

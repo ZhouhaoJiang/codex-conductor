@@ -4,6 +4,15 @@ All notable changes to Codex Conductor will be documented in this file.
 
 ## Unreleased
 
+- Added quiet `SessionStart` guidance for a concise `.ccc/<session-id>.md`
+  report with work, completion, and verification summaries.
+- Limited report updates to substantive project work and durable findings;
+  simple Q&A, clarification, planning-only, and status-only turns are skipped.
+- Kept reporting non-blocking and cumulative per session, with no per-message
+  section, completion check, or extra user-facing Hook response.
+- Kept report content model-authored and excluded chain-of-thought, prompts,
+  raw transcripts, secrets, and routine tool logs from the report contract.
+
 ## 0.2.2 - 2026-07-15
 
 - Restored bounded native subagents as Codex's task-local execution primitive

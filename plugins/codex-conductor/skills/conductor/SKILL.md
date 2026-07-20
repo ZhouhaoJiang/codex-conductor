@@ -198,3 +198,6 @@ If the CLI is not on `PATH`, run it from the plugin directory:
   completed history.
 - Prefer worktree threads for code changes that may conflict.
 - Prefer same-directory or existing-thread messages for read-only investigation.
+- After substantive coordinated work, keep one coordinator-owned
+  `.ccc/<session-id>.md` work report. Delegated units report back to the
+  coordinator instead of creating separate reports.

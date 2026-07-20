@@ -34,12 +34,14 @@ Conductor 把“能力”和“治理”分开：
 | 原生调度 | 有边界的 task-local subagent、可见 Session Dispatch Plan、项目路由、结果收集 | 默认直接执行；只有明确需要持久或可见产物时才创建 session |
 | 轻量执行 | `conductor-lite` | 显式启用；能直接做就直接做，只在必要时写短计划，只做一轮聚焦验证 |
 | 工程质量 | 按规模创建设计/计划产物、项目规范优先、真实测试文件、功能验收 | 在实现过程中执行；review 视角不是自动门禁 |
+| 会话工作报告 | `.ccc/<session-id>.md`，累计记录做了什么、完成了什么和验证结果 | SessionStart 静默引导；仅在产生实质项目成果后更新 |
 | 代码智能 | LSP、grep.app、Context7、可选 CodeGraph、Windows Git Bash | 按需使用，不挂每次编辑后的阻断诊断 |
 | 项目上下文 | 项目规则加载、文件规则匹配 | 只注入上下文；不携带上游模型专用规则 |
 | 专业知识 | 精选或改写后的工程 skills | 软触发或显式触发 |
 
 插件明确不包含自动更新、遥测、配置迁移、后台 CodeGraph 初始化、强制规划、
-goal/ledger 循环、Stop 续跑、执行证据门禁，以及上游 comment-checker 阻断器。
+goal/ledger 循环、Stop 续跑 Hook、执行证据门禁，以及上游 comment-checker
+阻断器。
 
 ## 按规模执行的工程质量
 
@@ -71,6 +73,7 @@ goal/ledger 循环、Stop 续跑、执行证据门禁，以及上游 comment-che
   重构和 QA 等聚焦 skills。
 - 提供五个 MCP：grep.app、Context7、LSP、Windows Git Bash、可选 CodeGraph。
 - 用非阻断生命周期 Hook 加载项目规则。
+- 引导 Codex 为每个 session 维护一份简短的项目内工作报告。
 - 用保守的 prompt hook 提醒是否该使用 Conductor，但不会自行创建执行单元或
   修改工作区。
 
@@ -88,6 +91,21 @@ Subagent 是限制在当前 task 内的 Codex 原生执行能力；session/threa
 可见的执行产物。Conductor 不会额外创建一个隐藏的 session operator 只为调用
 thread API。缺少匹配的原生能力时，它会留在主控 task，除非另一种原生执行单元具有
 相同的生命周期语义。
+
+## 会话工作报告
+
+在 `SessionStart` 时，一个非阻断 Hook 会静默告诉 Codex 当前会话报告应写到项目
+Git 根目录的 `.ccc/<session-id>.md`。只有某一轮产生了实质项目工作或可复用结论时，
+Codex 才会创建或更新报告，并且只记录：
+
+- 做了什么
+- 完成了什么
+- 验证结果，或者没有验证的原因
+
+问候、简单问答或解释、澄清、确认、纯计划和纯状态消息都不会更新报告。每个
+session 只有一份累计报告，不按每条消息追加小节。Hook 本身不代写、不检查、不阻断
+结束，也不会产生额外回复。报告不得包含思维链、prompt、原始会话、密钥或日常工具
+流水；它默认属于本地 session 元数据，除非用户明确要求，否则不加入暂存区或提交。
 
 ## 环境要求
 
@@ -237,6 +255,7 @@ MCP：
 - `apply_patch` 后匹配项目文件规则
 - compact 后重置项目规则缓存
 - Windows Git Bash 提醒和 compact 后提醒重置
+- 为 `.ccc/<session-id>.md` 注入一次静默的会话级引导
 
 精选 skills 包括四个原有 Conductor skill，以及 `conductor-lite`、
 `ast-grep`、`coding-agent-sessions`、`debugging`、`frontend`、`git-master`、
@@ -268,6 +287,7 @@ plugins/codex-conductor/scripts/smoke-test
 node --check plugins/codex-conductor/scripts/conductor-hook.mjs
 node --check plugins/codex-conductor/scripts/codegraph-mcp.mjs
 node --check plugins/codex-conductor/scripts/rules-hook.mjs
+node --check plugins/codex-conductor/scripts/work-report-hook.mjs
 python3 -m json.tool plugins/codex-conductor/.codex-plugin/plugin.json >/dev/null
 python3 -m json.tool plugins/codex-conductor/.mcp.json >/dev/null
 bash -n install.sh plugins/codex-conductor/bin/codex-conductor \

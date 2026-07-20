@@ -21,6 +21,11 @@ the current conversation:
   needed or proceed directly. Do not manufacture both documents to satisfy a
   ritual.
 
+The plugin-managed `.ccc/<session-id>.md` file is a concise factual work report,
+not a design document, plan, evidence ledger, or reason to create more workflow
+artifacts. Update it only after substantive project work or durable findings,
+not after ordinary conversation or status-only turns.
+
 The value of a document comes from preserving a decision or coordinating work,
 not from its length.
 

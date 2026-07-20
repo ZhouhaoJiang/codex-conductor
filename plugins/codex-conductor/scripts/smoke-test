@@ -208,6 +208,11 @@ for (const hookPath of hookPaths) {
   }
 
   const hookManifest = JSON.parse(readFileSync(absoluteHookPath, "utf8"));
+  for (const topLevelKey of Object.keys(hookManifest)) {
+    if (topLevelKey !== "hooks") {
+      throw new Error(`${hookPath} uses a hook-manifest field unsupported by the minimum Codex CLI: ${topLevelKey}`);
+    }
+  }
   for (const [eventName, entries] of Object.entries(hookManifest.hooks ?? {})) {
     registeredEvents.add(eventName);
     if (!Array.isArray(entries) || entries.length === 0) {
@@ -241,6 +246,7 @@ for (const command of registeredCommands) {
   const allowed = [
     "/scripts/conductor-hook.mjs",
     "/scripts/rules-hook.mjs",
+    "/scripts/work-report-hook.mjs",
     "/runtime/git-bash-hook/dist/cli.js",
   ];
   if (!allowed.some((target) => command.includes(target))) {
@@ -499,5 +505,70 @@ context_output="$(printf '%s' "$context_payload" | node "$PLUGIN_DIR/scripts/con
   printf 'hook recommended conductor for codex context prompt\n' >&2
   exit 1
 }
+
+PLUGIN_DIR="$PLUGIN_DIR" PROJECT_DIR="$PROJECT_DIR" node <<'NODE'
+const { existsSync, mkdirSync } = require("node:fs");
+const { join } = require("node:path");
+const { spawnSync } = require("node:child_process");
+
+const pluginDir = process.env.PLUGIN_DIR;
+const projectDir = process.env.PROJECT_DIR;
+const nestedDir = join(projectDir, "src", "nested");
+const hookPath = join(pluginDir, "scripts", "work-report-hook.mjs");
+const sessionId = "019f7d9b-e5fe-72c0-a9cf-d7177a85ab74";
+const reportPath = join(projectDir, ".ccc", `${sessionId}.md`);
+
+mkdirSync(join(projectDir, ".git"), { recursive: true });
+mkdirSync(nestedDir, { recursive: true });
+
+function runHook(overrides = {}) {
+  const payload = {
+    hook_event_name: "SessionStart",
+    session_id: sessionId,
+    transcript_path: null,
+    cwd: nestedDir,
+    model: "gpt-5",
+    permission_mode: "default",
+    source: "startup",
+    ...overrides,
+  };
+  const result = spawnSync(process.execPath, [hookPath, "session-start"], {
+    cwd: nestedDir,
+    encoding: "utf8",
+    input: JSON.stringify(payload),
+  });
+  if (result.status !== 0) {
+    throw new Error(`work-report hook failed: ${result.stderr}`);
+  }
+  return result.stdout;
+}
+
+const output = JSON.parse(runHook());
+const hookOutput = output.hookSpecificOutput;
+if (hookOutput?.hookEventName !== "SessionStart") {
+  throw new Error("work-report hook must return quiet SessionStart additional context");
+}
+const guidance = hookOutput.additionalContext ?? "";
+for (const requiredText of [
+  reportPath,
+  "not a per-message requirement",
+  "substantive project work",
+  "simple questions or explanations",
+  "做了什么",
+  "完成了什么",
+  "验证结果",
+  "Do not interrupt, block, or send an extra user-facing message",
+]) {
+  if (!guidance.includes(requiredText)) {
+    throw new Error(`work-report guidance is missing: ${requiredText}`);
+  }
+}
+if (existsSync(reportPath)) {
+  throw new Error("work-report SessionStart hook must not create a report eagerly");
+}
+if (runHook({ hook_event_name: "Stop" }) !== "") {
+  throw new Error("work-report hook must ignore unrelated lifecycle events");
+}
+NODE
 
 printf 'codex-conductor smoke test passed\n'
